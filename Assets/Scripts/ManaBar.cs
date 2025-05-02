@@ -16,7 +16,7 @@ public class ManaBar : MonoBehaviour
 
     private void OnDisable() {
         if (characterStats != null)
-            characterStats.onManaChanged += UpdateMana;
+            characterStats.onManaChanged -= UpdateMana;
     }
 
     public void UpdateMana(float currentMana, float maxMana)
@@ -25,5 +25,10 @@ public class ManaBar : MonoBehaviour
         slider.value = currentMana;
         currentManaText.text = currentMana + "/" + maxMana;
     }
-    
+    void Start()
+    {
+        OnEnable();
+        characterStats.ApplyStatCalculation();
+    }
+        
 }

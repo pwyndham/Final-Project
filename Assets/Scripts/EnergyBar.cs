@@ -16,7 +16,7 @@ public class EnergyBar : MonoBehaviour
 
     private void OnDisable() {
         if (characterStats != null)
-            characterStats.onEnergyChanged += UpdateEnergy;
+            characterStats.onEnergyChanged -= UpdateEnergy;
     }
 
     public void UpdateEnergy(float currentEnergy, float maxEnergy)

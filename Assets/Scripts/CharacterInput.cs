@@ -1,13 +1,16 @@
+using System;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.Animations;
+using UnityEngine.UI;
 
 public class CharacterInput : MonoBehaviour
 {
     
     // public Character character;
     // public Transform cameraTransform;
-    
+    public GameObject MainMenuUI;
+    public GameObject characterStatsUI;
 
     float xInput;
     float yInput;
@@ -62,6 +65,23 @@ public class CharacterInput : MonoBehaviour
         PlayerSprint();
         characterController.Move(cameraRelativeMovement * characterStats.CharacterSpeed * Time.deltaTime);
         
+        OpenMenu();
+        OpenStats();
+    }
+
+    private void OpenStats()
+    {
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            if (characterStatsUI.activeInHierarchy)
+            {
+                characterStatsUI.SetActive(false);
+            }
+            else
+            {
+                characterStatsUI.SetActive(true);
+            }
+        }
     }
 
     void LateUpdate() 
@@ -220,6 +240,21 @@ public class CharacterInput : MonoBehaviour
         else
         {
             Debug.Log("Is mage or some");
+        }
+    }
+
+    void OpenMenu()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (MainMenuUI.activeInHierarchy)
+            {
+                MainMenuUI.SetActive(false);
+            }
+            else
+            {
+                MainMenuUI.SetActive(true);
+            }
         }
     }
 }

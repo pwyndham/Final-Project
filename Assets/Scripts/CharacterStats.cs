@@ -8,6 +8,7 @@ using Random = UnityEngine.Random;
 public class CharacterStats : MonoBehaviour
 {
     Character character;
+    CharacterAbilities characterAbilities;
     public string classTypeCached;
     public BaseClass characterClass;
     public CharacterClassHandler characterClassHandler;
@@ -15,6 +16,8 @@ public class CharacterStats : MonoBehaviour
     /// <summary>
     /// NOTE: ALL VALUES ARE FOR BASIS. CHANGE DUE TO STAT SYSTEM. NO NULLS
     /// </summary>
+
+    public float levelUpPoints;
     public float energyCost = 5f; // character input energy
     public float projectileCost = 15f; // character input projectiles
 
@@ -105,6 +108,7 @@ public class CharacterStats : MonoBehaviour
             characterClassHandler.ClassDefaultInstantiation("Mage Class");
             //Debug.Log("Projectile damage" + projectile.damage);
             //magicDamage = projectile.damage;
+            characterAbilities.AssignAbilities(classType);
             Debug.Log(magicDamage);
 
             ApplyStatCalculation();
@@ -125,6 +129,8 @@ public class CharacterStats : MonoBehaviour
 
             playerMeleeWeapon = GetComponentInChildren<PlayerMeleeWeapon>();
             meleeShortDamage = playerMeleeWeapon.damage;
+
+            characterAbilities.AssignAbilities(classType);
             Debug.Log(meleeShortDamage);
 
             ApplyStatCalculation();
@@ -142,6 +148,8 @@ public class CharacterStats : MonoBehaviour
 
             playerMeleeWeapon = GetComponentInChildren<PlayerMeleeWeapon>();
             meleeDamage = playerMeleeWeapon.damage;
+
+            characterAbilities.AssignAbilities(classType);
             Debug.Log(meleeDamage);
 
             ApplyStatCalculation();
@@ -157,20 +165,32 @@ public class CharacterStats : MonoBehaviour
 
     }
 
-    
-
     void HandleLevelUp()
     {
         if (characterClass != null)
         {
             characterClass.ApplyLevelUp(characterExperience.characterLevel);
+            StatUpgrade();
             ApplyStatCalculation();
+            UpdateBars();
             Debug.Log("Strength: " + characterClass.strength);
             Debug.Log("Const: " + characterClass.constitution);
         }
     }
 
-   void ApplyStatCalculation()
+    public void LevelUpStat(int stat)
+    {
+        stat+=1;
+    }
+    void StatUpgrade()
+    {
+        levelUpPoints += 1f;
+
+        //give level up point to player
+        //they can use whenever
+        //in UI reference character stat and send point back to stat class
+    }
+   public void ApplyStatCalculation()
    {    
         
         limiter = .1f;
@@ -216,7 +236,7 @@ public class CharacterStats : MonoBehaviour
         //TODO: 
         magicResistance = characterClass.magicResistance * characterClass.magicResistanceMultiplier;
 
-       
+        UpdateBars();
    }
 
     void OnDrawGizmosSelected()
@@ -247,7 +267,10 @@ public class CharacterStats : MonoBehaviour
     IEnumerator StopOutlinePeriod(Creature creature)
     {
         yield return new WaitForSeconds(3);
+        if (creature != null)
+        {
         creature.DisableOutline();
+        }
     }
     public float ApplyCriticalStrikeChance(float baseDamage)
     {
@@ -263,7 +286,7 @@ public class CharacterStats : MonoBehaviour
         return baseDamage;
     }
 
-    void UpdateBars()
+    public void UpdateBars()
     {
         onHealthChanged?.Invoke(healthPoints,maxHealthPoints);
         onManaChanged?.Invoke(manaPoints,maxManaPoints);
@@ -274,19 +297,21 @@ public class CharacterStats : MonoBehaviour
         
         //SetCharacterClass(ui string passed in); // pass in string from ui
 
-        manaPoints = maxManaPoints;
-        energyPoints = maxEnergyPoints;
-        healthPoints = maxHealthPoints;
-
-        UpdateBars();
+        
 
         characterClassHandler = GetComponentInChildren<CharacterClassHandler>();
         character = GetComponent<Character>();
         characterExperience = GetComponent<CharacterExperience>();
+        characterAbilities = GetComponent<CharacterAbilities>();
 
         characterExperience.OnLevelUp += HandleLevelUp;
+
+        manaPoints = maxManaPoints;
+        energyPoints = maxEnergyPoints;
+        healthPoints = maxHealthPoints;
+
+        //UpdateBars();
     }
-   
 
     public void TakeDamage(float damage, DamageType damageType)
     {

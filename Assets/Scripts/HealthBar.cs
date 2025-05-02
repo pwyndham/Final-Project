@@ -17,7 +17,7 @@ public class HealthBar : MonoBehaviour
 
     private void OnDisable() {
         if (characterStats != null)
-            characterStats.onHealthChanged += UpdateHealth;
+            characterStats.onHealthChanged -= UpdateHealth;
     }
 
     public void UpdateHealth(float currentHealth, float maxHealth)

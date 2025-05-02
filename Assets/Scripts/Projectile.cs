@@ -64,6 +64,8 @@ public class Projectile : MonoBehaviour
 
     if (CompareTag("EnemyRangedProjectile") && hit.CompareTag("Player"))
     {
+        // Physics.IgnoreLayerCollision(0, 8);
+        
         var stats = hit.GetComponent<CharacterStats>();
         stats?.TakeDamage(damage, DamageType.Physical);
         Debug.Log("Player taking damage");
@@ -71,6 +73,8 @@ public class Projectile : MonoBehaviour
     }
     if (CompareTag("EnemyMagicProjectile") && hit.CompareTag("Player"))
     {
+        // Physics.IgnoreLayerCollision(0, 8);
+
         var stats = hit.GetComponent<CharacterStats>();
         stats?.TakeDamage(damage, DamageType.Magical);
         Debug.Log("Player taking damage");
