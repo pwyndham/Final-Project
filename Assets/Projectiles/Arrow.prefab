@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 6130624595899729686}
   - component: {fileID: 1083428521325278420}
   - component: {fileID: 1056518022230622143}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Cube (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -119,7 +119,7 @@ GameObject:
   - component: {fileID: 7173420246438132569}
   - component: {fileID: -2417088892308096720}
   - component: {fileID: 7783450493131908457}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Arrow
   m_TagString: EnemyRangedProjectile
   m_Icon: {fileID: 0}
@@ -182,6 +182,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 375d5b4f3ae4f1e45bd9f33af0d36d50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  characterStats: {fileID: 0}
+  projectileType: 0
   damage: 5
   speed: 20
   lifetime: 30
@@ -197,7 +199,7 @@ GameObject:
   - component: {fileID: 8618951975759953947}
   - component: {fileID: 2542093256888264143}
   - component: {fileID: 2948323229024768837}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}

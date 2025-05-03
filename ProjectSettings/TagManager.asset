@@ -21,8 +21,8 @@ TagManager:
   - Terrain
   - Interactable
   - Enemy
-  - 
-  - 
+  - Forcefield
+  - Projectile
   - 
   - 
   - 

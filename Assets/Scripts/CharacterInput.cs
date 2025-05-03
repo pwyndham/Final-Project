@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.Animations;
@@ -7,8 +8,11 @@ using UnityEngine.UI;
 public class CharacterInput : MonoBehaviour
 {
     
+    public Dash dashAbility;
     // public Character character;
     // public Transform cameraTransform;
+    public List<CharacterAbilities> characterAbilities;
+
     public GameObject MainMenuUI;
     public GameObject characterStatsUI;
 
@@ -43,16 +47,20 @@ public class CharacterInput : MonoBehaviour
 
     void Awake() 
     {
+        dashAbility = GetComponent<Dash>();
         characterStats = GetComponent<CharacterStats>();
         characterController = GetComponent<CharacterController>();
     }
  
     void Update()
     {
-        ShootProjectile();
+        // ShootProjectile();
+        if (dashAbility != null && dashAbility.isDashing)
+        return;
+
         ApplyGravity();
         PlayerJump();
-        SwingWeapon();
+        // SwingWeapon();
 
         xInput = Input.GetAxis("Horizontal");
         zInput = Input.GetAxis("Vertical");
@@ -193,35 +201,34 @@ public class CharacterInput : MonoBehaviour
         return Physics.OverlapSphere(groundCheckTransform.position, .5f, terrainLayers).Length > 0;
     }
     
-    void ShootProjectile()
-    {
-        if (Input.GetKeyDown(KeyCode.Q) && projectilePrefab != null && characterStats.classTypeCached == "Mage Class")
-        {
-            if (characterStats.manaPoints >= characterStats.projectileCost)
-            {
-                characterStats.UseMana(characterStats.ProjectileCost); // flat energy usage
-                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                if (Physics.Raycast(ray, out RaycastHit hit, 999f))
-                {
-                    Vector3 direction = (hit.point - projectilePoint.position).normalized;
-                    GameObject projectileInstance = Instantiate(projectilePrefab, projectilePoint.position, Quaternion.LookRotation(direction));
-                    Projectile projectileComponent = projectileInstance.GetComponent<Projectile>();
+    // void ShootProjectile()
+    // {
+    //     if (Input.GetKeyDown(KeyCode.Q) && projectilePrefab != null && characterStats.classTypeCached == "Mage Class")
+    //     {
+    //         if (characterStats.manaPoints >= characterStats.projectileCost)
+    //         {
+    //             characterStats.UseMana(characterStats.ProjectileCost); // flat energy usage
+    //             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+    //             if (Physics.Raycast(ray, out RaycastHit hit, 999f))
+    //             {
+    //                 Vector3 direction = (hit.point - projectilePoint.position).normalized;
+    //                 GameObject projectileInstance = Instantiate(projectilePrefab, projectilePoint.position, Quaternion.LookRotation(direction));
+    //                 Projectile projectileComponent = projectileInstance.GetComponent<Projectile>();
 
-
-                    if (projectileComponent != null)
-                    {
-                        projectileComponent.Launch(direction, characterStats.magicDamage, characterStats.projectileSpeed);
-                        projectileComponent.SetProjectileStats(characterStats); // ✅ pass stats to projectile
-                    }
-                }
-            }
-            else
-            {
-                Debug.Log("NOT ENOUGH MANA or not a mage or projectile prefab is null");
-            }
+    //                 if (projectileComponent != null)
+    //                 {
+    //                     projectileComponent.Launch(direction, characterStats.magicDamage, characterStats.projectileSpeed);
+    //                     projectileComponent.SetProjectileStats(characterStats); // ✅ pass stats to projectile
+    //                 }
+    //             }
+    //         }
+    //         else
+    //         {
+    //             Debug.Log("NOT ENOUGH MANA or not a mage or projectile prefab is null");
+    //         }
             
-        }
-    }
+    //     }
+    // }
 
     // void Interact()
     // {
@@ -231,17 +238,17 @@ public class CharacterInput : MonoBehaviour
     //         //get object reference in raycast from player interact
     //     }
     // }
-    void SwingWeapon()
-    {
-        if (Input.GetKeyDown(KeyCode.Mouse0) && characterStats.classTypeCached != "Mage Class")
-        {
-            Debug.Log("attacking");
-        }
-        else
-        {
-            Debug.Log("Is mage or some");
-        }
-    }
+    // void SwingWeapon()
+    // {
+    //     if (Input.GetKeyDown(KeyCode.Mouse0) && characterStats.classTypeCached != "Mage Class")
+    //     {
+    //         Debug.Log("attacking");
+    //     }
+    //     else
+    //     {
+    //         Debug.Log("Is mage or some");
+    //     }
+    // }
 
     void OpenMenu()
     {
