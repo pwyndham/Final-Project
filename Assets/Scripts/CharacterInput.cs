@@ -15,6 +15,7 @@ public class CharacterInput : MonoBehaviour
 
     public GameObject MainMenuUI;
     public GameObject characterStatsUI;
+    public GameObject abilitiesUI;
 
     float xInput;
     float yInput;
@@ -75,6 +76,7 @@ public class CharacterInput : MonoBehaviour
         
         OpenMenu();
         OpenStats();
+        OpenAbilities();
     }
 
     private void OpenStats()
@@ -88,6 +90,21 @@ public class CharacterInput : MonoBehaviour
             else
             {
                 characterStatsUI.SetActive(true);
+            }
+        }
+    }
+
+    private void OpenAbilities()
+    {
+        if (Input.GetKeyDown(KeyCode.Z))
+        {
+            if (abilitiesUI.activeInHierarchy)
+            {
+                abilitiesUI.SetActive(false);
+            }
+            else
+            {
+                abilitiesUI.SetActive(true);
             }
         }
     }

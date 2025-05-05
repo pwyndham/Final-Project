@@ -31,9 +31,6 @@ public class WarriorBasicAttack : Ability
         // swing blade
         // animation
         // dust particle
-        // take energy
-        // put ability on cooldown
-        
     }
 
     IEnumerator Cooldown()

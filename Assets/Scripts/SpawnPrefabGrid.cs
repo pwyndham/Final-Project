@@ -1,0 +1,500 @@
+using System.Collections;
+using System.Collections.Generic;
+//using Unity.Mathematics;
+using UnityEngine;
+using UnityEngine.AI;
+
+public class SpawnPrefabGrid : MonoBehaviour
+{
+    public RuntimeNavMeshBaker runtimeNavMeshBaker;
+    public enum TileType { Empty, Room, Hallway, Door, Wall }
+    private TileType[,] gridMap;
+    private GameObject[,] spawnedTiles;
+
+    public GameObject[] GridPrefabs = new GameObject[4]; // 0 = Room, 1 = Hallway, 2 = Door
+    private List<Vector2Int> roomCenters = new List<Vector2Int>();
+    private List<RoomData> roomPrefabs = new List<RoomData>();
+    public GameObject waypointPrefab;
+
+    public GameObject enemyMelee;
+    public GameObject enemyRanged;
+    public GameObject enemyMage;
+
+    public int baseRoom1Count = 3;
+    public int baseRoom2Count = 2;
+    public int baseRoom3Count = 1;
+    public int lootRoomCount = 1;
+    public int barracksRoomCount = 1;
+    public int armoryRoomCount = 1;
+
+    public enum RoomSize { BaseRoom1, BaseRoom2, BaseRoom3, LootRoom, ArmoryRoom, BarracksRoom, None }
+
+    public class RoomData
+    {
+        public RoomSize size;
+        public int width, height;
+        public int x, y; // Bottom-left corner
+        public List<GameObject> enemyPrefabs = new List<GameObject>();
+        public List<GameObject> lootPrefabs = new List<GameObject>();
+        public List<Vector3> enemyOffsets = new List<Vector3>();
+        public List<Transform> roomWaypoints = new List<Transform>();
+
+        public RoomData(RoomSize size, int x, int y)
+        {
+            this.size = size;
+            this.x = x;
+            this.y = y;
+            switch (size)
+            {
+                case RoomSize.BaseRoom1: width = 3; height = 5; break;
+                case RoomSize.BaseRoom2: width =  height = 5; break;
+                case RoomSize.BaseRoom3: width = height = 7; break;
+                case RoomSize.LootRoom: width = 5; height = 9; break;
+                case RoomSize.ArmoryRoom: width = 7; height = 5; break;
+                case RoomSize.BarracksRoom: width = 11; height = 7; break;
+            }
+        }
+
+        public Vector2Int Center => new Vector2Int(x + width / 2, y + height / 2);
+    }
+
+    public float GridX = 30f;
+    public float GridZ = 30f;
+    public float gridSpacingOffset = 1f;
+    public Vector3 GridOrigin = Vector3.zero;
+
+    void Start()
+    {
+        gridMap = new TileType[(int)GridX, (int)GridZ];
+        spawnedTiles = new GameObject[(int)GridX, (int)GridZ];
+        SpawnGrid();
+    }
+
+    
+    private void PlaceWallIfNeeded(int x, int z, Quaternion rotation)
+    {
+        if (x < 0 || x >= GridX || z < 0 || z >= GridZ)
+        return;
+
+        if (gridMap[x, z] != TileType.Empty) // place only on empty tiles
+        return;
+
+    Vector3 pos = new Vector3(x * gridSpacingOffset, 0, z * gridSpacingOffset);
+    Vector3 offset = Vector3.zero;
+
+        if (rotation == Quaternion.Euler(0, 180, 0)) offset = new Vector3(0, 0, -gridSpacingOffset / 2f);
+        else if (rotation == Quaternion.Euler(0, 0, 0)) offset = new Vector3(0, 0, gridSpacingOffset / 2f);
+        else if (rotation == Quaternion.Euler(0, -90, 0)) offset = new Vector3(-gridSpacingOffset / 2f, 0, 0);
+        else if (rotation == Quaternion.Euler(0, 90, 0)) offset = new Vector3(gridSpacingOffset / 2f, 0, 0);
+
+    Vector3 newpos = pos + offset;
+    GameObject wall = Instantiate(GridPrefabs[3], newpos, rotation);
+    wall.transform.parent = transform;
+
+
+    }
+
+    private void SpawnGrid()
+    {
+        GenerateMapData();
+
+        // Spawn Room/Hallway
+        for (int x = 0; x < GridX; x++)
+        {
+            for (int z = 0; z < GridZ; z++)
+            {
+                Vector3 pos = new Vector3(x * gridSpacingOffset, 0, z * gridSpacingOffset) + GridOrigin;
+                GameObject go = null;
+
+                switch (gridMap[x, z])
+                {
+                    case TileType.Empty: break;
+                    case TileType.Room: go = Instantiate(GridPrefabs[0], pos, Quaternion.identity); 
+                    go.layer = LayerMask.NameToLayer("Walkable");break;
+                    case TileType.Hallway: go = Instantiate(GridPrefabs[1], pos, Quaternion.identity); 
+                    go.layer = LayerMask.NameToLayer("Terrain");break; // different layer to prevent wall clipping. 
+                    case TileType.Door: go = Instantiate(GridPrefabs[2], pos, Quaternion.identity); 
+                    go.layer = LayerMask.NameToLayer("Walkable");break;
+                }
+
+                if (go != null) spawnedTiles[x, z] = go;
+
+            }
+        }
+
+        foreach (RoomData room in roomPrefabs)
+        {
+
+            List<Vector2Int> edgeCenters = new List<Vector2Int>
+            {
+                new Vector2Int(room.x + room.width / 2, room.y),                         // bottom edge
+                new Vector2Int(room.x + room.width / 2, room.y + room.height - 1),      // top edge
+                new Vector2Int(room.x, room.y + room.height / 2),                       // left edge
+                new Vector2Int(room.x + room.width - 1, room.y + room.height / 2)       // right edge
+            };
+
+           
+            
+            foreach (var edge in edgeCenters)
+            {
+                int x = edge.x;
+                int z = edge.y;
+
+                if (gridMap[x, z] != TileType.Room) continue;
+                if (!IsAdjacentToHallway(x, z)) continue;
+
+                Destroy(spawnedTiles[x, z]);
+                Vector3 pos = new Vector3(x * gridSpacingOffset, 0, z * gridSpacingOffset) + GridOrigin;
+
+
+                Quaternion rotation = Quaternion.identity;
+                Vector3 offset = Vector3.zero;
+
+                if (IsHallway(x + 1, z)) rotation = Quaternion.Euler(0, 90, 0); // right
+                else if (IsHallway(x - 1, z)) rotation = Quaternion.Euler(0, -90, 0); // left
+                else if (IsHallway(x, z + 1)) rotation = Quaternion.Euler(0, 0, 0); // up
+                else if (IsHallway(x, z - 1)) rotation = Quaternion.Euler(0, 180, 0); // down
+
+                // Offset to make doors align properly
+                if (rotation == Quaternion.Euler(0, 180, 0)) offset = new Vector3(0, 0, -gridSpacingOffset / 2f);
+                else if (rotation == Quaternion.Euler(0, 0, 0)) offset = new Vector3(0, 0, gridSpacingOffset / 2f);
+                else if (rotation == Quaternion.Euler(0, -90, 0)) offset = new Vector3(-gridSpacingOffset / 2f, 0, 0);
+                else if (rotation == Quaternion.Euler(0, 90, 0)) offset = new Vector3(gridSpacingOffset / 2f, 0, 0);
+
+                Vector3 newpos = pos + offset;
+
+                GameObject door = Instantiate(GridPrefabs[4], newpos, rotation);
+                spawnedTiles[x, z] = door;
+
+                GameObject doorTile = Instantiate(GridPrefabs[2], pos, rotation);
+                spawnedTiles[x, z] = doorTile;
+                gridMap[x, z] = TileType.Door;
+
+            }
+
+            
+             // Top and bottom edges
+            for (int x = room.x; x < room.x + room.width; x++)
+            {
+                PlaceWallIfNeeded(x, room.y - 1, Quaternion.Euler(0, 0, 0)); // bottom
+                PlaceWallIfNeeded(x, room.y + room.height, Quaternion.Euler(0, 180, 0)); // top
+            }
+
+            // Left and right edges
+            for (int z = room.y; z < room.y + room.height; z++)
+            {
+                PlaceWallIfNeeded(room.x - 1, z, Quaternion.Euler(0, 90, 0)); // left
+                PlaceWallIfNeeded(room.x + room.width, z, Quaternion.Euler(0, -90, 0)); // right
+            }
+            
+        }
+        for (int x = 0; x < GridX; x++)
+        {
+            for (int z = 0; z < GridZ; z++)
+            {
+                if (gridMap[x, z] != TileType.Hallway)
+                    continue;
+
+                // Check all 8 directions around the tile
+                PlaceWallIfNeeded(x + 1, z, Quaternion.Euler(0, -90, 0)); // right
+                PlaceWallIfNeeded(x - 1, z, Quaternion.Euler(0, 90, 0));  // left
+                PlaceWallIfNeeded(x, z + 1, Quaternion.Euler(0, 180, 0)); // up
+                PlaceWallIfNeeded(x, z - 1, Quaternion.Euler(0, 0, 0));   // down
+
+  
+            }
+        }
+
+                // Second pass: Add walls between Room and Hallway tiles
+        for (int x = 0; x < GridX; x++)
+        {
+            for (int z = 0; z < GridZ; z++)
+            {
+                TileType current = gridMap[x, z];
+
+                // Check right neighbor
+                if (x + 1 < GridX)
+                {
+                    TileType right = gridMap[x + 1, z];
+                    if (AreRoomAndHallway(current, right))
+                        PlaceWallBetween(x, z, x + 1, z);
+                }
+
+                // Check top neighbor
+                if (z + 1 < GridZ)
+                {
+                    TileType top = gridMap[x, z + 1];
+                    if (AreRoomAndHallway(current, top))
+                        PlaceWallBetween(x, z, x, z + 1);
+                }
+            }
+        }
+
+        
+    }
+
+    bool IsHallway(int x, int z)
+    {
+        if (x < 0 || x >= gridMap.GetLength(0) || z < 0 || z >= gridMap.GetLength(1)) return false;
+        return gridMap[x, z] == TileType.Hallway;
+    }
+
+    IEnumerator EnemyGenerator()
+    {
+        yield return new WaitUntil(() => runtimeNavMeshBaker.BakeComplete());
+
+        foreach (RoomData room in roomPrefabs)
+            {
+                Vector3 basePos = new Vector3(room.x * gridSpacingOffset, 0, room.y * gridSpacingOffset);
+                for (int i = 0; i < room.enemyPrefabs.Count; i++)
+                {
+                    Vector3 spawnPos = basePos + room.enemyOffsets[i];
+                    GameObject enemy = Instantiate(room.enemyPrefabs[i], spawnPos, Quaternion.identity);
+                    enemy.transform.parent = transform;
+
+                    List<Transform> enemyWaypoints = new List<Transform>();
+
+                    for (int w = 0; w < 4; w++) // generate waypoints around enemy spawn
+                    {
+                        Vector3 offset = Random.insideUnitSphere * 3f;
+                        offset.y = 0;
+                        Vector3 wpPos = spawnPos + offset;
+
+                        if (NavMesh.SamplePosition(wpPos, out NavMeshHit hit, 1f, NavMesh.AllAreas))
+                        {
+                            GameObject wp = Instantiate(waypointPrefab, hit.position, Quaternion.identity);
+                            wp.name = $"Waypoint_{room.x}_{room.y}_{i}_{w}";
+                            wp.transform.parent = transform;
+                            enemyWaypoints.Add(wp.transform);
+                        }
+                    }
+
+                    EnemyRangedAI ai = enemy.GetComponent<EnemyRangedAI>();
+                    if (ai != null)
+                    {
+                        ai.waypoints = enemyWaypoints.ToArray();
+                    }
+                    EnemyMeleeAI ai2 = enemy.GetComponent<EnemyMeleeAI>();
+                    if (ai2 != null)
+                    {
+                        ai2.waypoints = enemyWaypoints.ToArray();
+                    }
+                    EnemyMageAI ai3 = enemy.GetComponent<EnemyMageAI>();
+                    if (ai3 != null)
+                    {
+                        ai3.waypoints = enemyWaypoints.ToArray();
+                    }
+                }
+            }
+    }
+
+    private bool AreRoomAndHallway(TileType a, TileType b)
+    {
+        return (a == TileType.Room && b == TileType.Hallway) || 
+            (a == TileType.Hallway && b == TileType.Room);
+    }
+
+    private void PlaceWallBetween(int x1, int z1, int x2, int z2)
+    {
+        Vector3 center1 = new Vector3(x1 * gridSpacingOffset, 0, z1 * gridSpacingOffset);
+        Vector3 center2 = new Vector3(x2 * gridSpacingOffset, 0, z2 * gridSpacingOffset);
+
+        Vector3 midPoint = (center1 + center2) / 2f;
+        Quaternion rotation;
+
+        if (x1 != x2) // horizontal wall
+            rotation = Quaternion.Euler(0, 90, 0);
+        else // vertical wall
+            rotation = Quaternion.Euler(0, 0, 0);
+
+        GameObject wall = Instantiate(GridPrefabs[3], midPoint, rotation);
+        wall.transform.parent = transform;
+    }
+
+    public bool IsGenerationComplete {get; private set;} = false;
+    private void GenerateMapData()
+    {
+
+        int startX = (int)GridX / 2;
+        int startZ = (int)GridZ / 2;
+        RoomData startingRoom = new RoomData(RoomSize.BaseRoom1, startX, startZ);
+
+        // Ensure the grid space is empty
+        bool canPlace = true;
+        for (int x = startingRoom.x; x < startingRoom.x + startingRoom.width && canPlace; x++)
+        {
+            for (int z = startingRoom.y; z < startingRoom.y + startingRoom.height && canPlace; z++)
+            {
+                if (gridMap[x, z] != TileType.Empty) canPlace = false;
+            }
+        }
+
+        if (canPlace)
+        {
+            for (int x = startingRoom.x; x < startingRoom.x + startingRoom.width; x++)
+                for (int z = startingRoom.y; z < startingRoom.y + startingRoom.height; z++)
+                    gridMap[x, z] = TileType.Room;
+
+            roomPrefabs.Add(startingRoom);
+            roomCenters.Add(startingRoom.Center);
+
+            baseRoom1Count--;
+        }
+
+        int totalNeeded = baseRoom1Count + baseRoom2Count + baseRoom3Count +
+                        barracksRoomCount + lootRoomCount + armoryRoomCount;
+
+        int placed = 0, attempts = 0, maxAttempts = 200;
+
+        while (placed < totalNeeded && attempts++ < maxAttempts)
+        {
+            RoomSize size = ChooseRandomAvailableRoomType();
+            if (size == RoomSize.None) continue;
+
+            // Decrement the room count
+            RoomData room = TryPlaceRoom(size);
+            if (room != null)
+            {
+                roomPrefabs.Add(room);
+                roomCenters.Add(room.Center);
+                placed++;
+            }
+
+            switch (size)
+            {
+                case RoomSize.BaseRoom1: baseRoom1Count--; 
+                // room.enemyPrefabs.Add(enemyMelee);
+                // room.enemyOffsets.Add(new Vector3(1, 0, 1));
+                // room.enemyPrefabs.Add(enemyMelee);
+                // room.enemyOffsets.Add(new Vector3(2, 0, 2));
+                break;
+                case RoomSize.BaseRoom2: baseRoom2Count--; 
+                room.enemyPrefabs.Add(enemyRanged);
+                room.enemyOffsets.Add(new Vector3(1, 0, 1));
+                room.enemyPrefabs.Add(enemyRanged);
+                room.enemyOffsets.Add(new Vector3(2, 0, 2));
+                break;
+                case RoomSize.BaseRoom3: baseRoom3Count--; 
+                room.enemyPrefabs.Add(enemyMelee);
+                room.enemyOffsets.Add(new Vector3(1, 0, 1));
+                room.enemyPrefabs.Add(enemyMelee);
+                room.enemyOffsets.Add(new Vector3(2, 0, 2));
+                break;
+                case RoomSize.BarracksRoom: barracksRoomCount--; 
+                room.enemyPrefabs.Add(enemyMage);
+                room.enemyOffsets.Add(new Vector3(1, 0, 1));
+                room.enemyPrefabs.Add(enemyRanged);
+                room.enemyOffsets.Add(new Vector3(2, 0, 2));
+                break;
+                case RoomSize.LootRoom: lootRoomCount--; 
+                room.enemyPrefabs.Add(enemyMage);
+                room.enemyOffsets.Add(new Vector3(1, 0, 1));
+                room.enemyPrefabs.Add(enemyRanged);
+                room.enemyOffsets.Add(new Vector3(2, 0, 2));
+                break;
+                case RoomSize.ArmoryRoom: armoryRoomCount--; 
+                room.enemyPrefabs.Add(enemyMage);
+                room.enemyOffsets.Add(new Vector3(1, 0, 1));
+                room.enemyPrefabs.Add(enemyRanged);
+                room.enemyOffsets.Add(new Vector3(2, 0, 2));
+                break;
+            }
+       
+        }
+        
+
+        ConnectRoomsWithHallways();
+
+        IsGenerationComplete = true;
+
+        StartCoroutine(EnemyGenerator()); 
+        
+    }
+
+    private RoomSize ChooseRandomAvailableRoomType()
+{
+    List<RoomSize> availableTypes = new List<RoomSize>();
+
+    if (baseRoom1Count > 0) availableTypes.Add(RoomSize.BaseRoom1);
+    if (baseRoom2Count > 0) availableTypes.Add(RoomSize.BaseRoom2);
+    if (baseRoom3Count > 0) availableTypes.Add(RoomSize.BaseRoom3);
+    if (barracksRoomCount > 0) availableTypes.Add(RoomSize.BarracksRoom);
+    if (lootRoomCount > 0) availableTypes.Add(RoomSize.LootRoom);
+    if (armoryRoomCount > 0) availableTypes.Add(RoomSize.ArmoryRoom);
+
+    if (availableTypes.Count == 0) return RoomSize.None; //  fallback enum
+
+    return availableTypes[Random.Range(0, availableTypes.Count)];
+}
+
+    private RoomData TryPlaceRoom(RoomSize size)
+    {
+        RoomData test = new RoomData(size, 0, 0);
+
+        for (int i = 0; i < 100; i++)
+        {
+            int rx = Random.Range(1, (int)(GridX - test.width - 1));
+            int rz = Random.Range(1, (int)(GridZ - test.height - 1));
+            test = new RoomData(size, rx, rz);
+
+            bool canPlace = true;
+
+            for (int x = test.x; x < test.x + test.width && canPlace; x++)
+            {
+                for (int z = test.y; z < test.y + test.height && canPlace; z++)
+                {
+                    if (gridMap[x, z] != TileType.Empty) canPlace = false;
+                }
+            }
+
+            if (!canPlace) continue;
+
+            for (int x = test.x; x < test.x + test.width; x++)
+                for (int z = test.y; z < test.y + test.height; z++)
+                    gridMap[x, z] = TileType.Room;
+
+            return test;
+        }
+
+        return null;
+    }
+
+    private void ConnectRoomsWithHallways()
+    {
+        for (int i = 0; i < roomCenters.Count - 1; i++)
+        {
+            Vector2Int a = roomCenters[i];
+            Vector2Int b = roomCenters[i + 1];
+
+            // First horizontal (1 tile wide)
+            for (int x = Mathf.Min(a.x, b.x); x <= Mathf.Max(a.x, b.x); x++)
+                SetIfEmpty(x, a.y, TileType.Hallway);
+
+            // Then vertical (1 tile wide)
+            for (int z = Mathf.Min(a.y, b.y); z <= Mathf.Max(a.y, b.y); z++)
+                SetIfEmpty(b.x, z, TileType.Hallway);
+        }
+    }
+
+    private void SetIfEmpty(int x, int z, TileType type)
+    {
+        if (x >= 0 && x < GridX && z >= 0 && z < GridZ)
+        {
+            if (gridMap[x, z] == TileType.Empty)
+                gridMap[x, z] = type;
+        }
+    }
+
+    private bool IsAdjacentToHallway(int x, int z)
+    {
+        return (x > 0 && gridMap[x - 1, z] == TileType.Hallway) ||
+               (x < GridX - 1 && gridMap[x + 1, z] == TileType.Hallway) ||
+               (z > 0 && gridMap[x, z - 1] == TileType.Hallway) ||
+               (z < GridZ - 1 && gridMap[x, z + 1] == TileType.Hallway);
+    }
+
+
+    // enemy functionality in rooms
+    // loot spawns, ignore doors
+    // prefabs walls, doors, floors, other.
+}

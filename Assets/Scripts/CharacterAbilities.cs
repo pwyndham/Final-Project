@@ -7,7 +7,7 @@ using UnityEngine;
 public class CharacterAbilities : MonoBehaviour
 {
 
-    List<Ability> abilities = new List<Ability>();
+    public List<Ability> abilities = new List<Ability>();
     Ability ability;
     public void AssignAbilities(string classType)
     {

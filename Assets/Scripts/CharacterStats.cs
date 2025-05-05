@@ -9,6 +9,7 @@ public class CharacterStats : MonoBehaviour
 {
     Character character;
     CharacterAbilities characterAbilities;
+    public AbilitiesUI abilitiesUI;
     public string classTypeCached;
     public BaseClass characterClass;
     public CharacterClassHandler characterClassHandler;
@@ -109,6 +110,7 @@ public class CharacterStats : MonoBehaviour
             //Debug.Log("Projectile damage" + projectile.damage);
             //magicDamage = projectile.damage;
             characterAbilities.AssignAbilities(classType);
+            abilitiesUI.UpdateAbilitiesUI();
             Debug.Log(magicDamage);
 
             ApplyStatCalculation();
@@ -131,6 +133,7 @@ public class CharacterStats : MonoBehaviour
             meleeShortDamage = playerMeleeWeapon.damage;
 
             characterAbilities.AssignAbilities(classType);
+            abilitiesUI.UpdateAbilitiesUI();
             Debug.Log(meleeShortDamage);
 
             ApplyStatCalculation();
@@ -150,6 +153,7 @@ public class CharacterStats : MonoBehaviour
             meleeDamage = playerMeleeWeapon.damage;
 
             characterAbilities.AssignAbilities(classType);
+            abilitiesUI.UpdateAbilitiesUI();
             Debug.Log(meleeDamage);
 
             ApplyStatCalculation();

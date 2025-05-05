@@ -153,12 +153,24 @@ PrefabInstance:
       value: Enemy Mage
       objectReference: {fileID: 0}
     - target: {fileID: 2674686198616501390, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 2674686198616501390, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 2674686198616501390, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 2674686198616501390, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}
       propertyPath: m_LocalPosition.x
       value: 54.07
       objectReference: {fileID: 0}
     - target: {fileID: 2674686198616501390, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -5.5611587
+      value: -5
       objectReference: {fileID: 0}
     - target: {fileID: 2674686198616501390, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}
       propertyPath: m_LocalPosition.z
@@ -272,17 +284,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c23ce4c2eb95af49b96daf924fc6450, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &2890689584689845644 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 9124964230953091521, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}
-  m_PrefabInstance: {fileID: 6250899816436913229}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 311315841b9b8004dbb8bbb3d5a9788e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &6508182875639648638 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 931714695991051571, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}
@@ -304,7 +305,7 @@ CharacterController:
     m_Bits: 0
   m_LayerOverridePriority: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Height: 2
   m_Radius: 0.5
@@ -325,10 +326,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c581a25f0a344f46ada640aa66a4a9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 5
-  health: 25
-  maxHealth: 25
-  healthBar: {fileID: 2890689584689845644}
+  healthBar: {fileID: 0}
+  characterExperience: {fileID: 0}
+  baseMaterial: {fileID: 0}
+  hitMaterial: {fileID: 0}
+  _health: 25
+  _maxHealth: 25
+  _experiencePoints: 30
+  _speed: 4
 --- !u!114 &1284023515157073963
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -348,7 +353,7 @@ MonoBehaviour:
   playerTransform: {fileID: 0}
   enemyProjectileController: {fileID: 0}
   waypoints: []
-  lookRadius: 15
+  lookRadius: 5
   attackRange: 10
   attackCooldown: 2
 --- !u!195 &2158652084547530172
@@ -361,7 +366,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
-  m_Speed: 3.5
+  m_Speed: 1
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120
@@ -387,6 +392,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   projectilePrefab: {fileID: 3180777857420034535, guid: 77de03048d673c8418dde2076617b5f8, type: 3}
   projectilePoint: {fileID: 8320423232453675586}
+  scaledDamage: 0
+  scaledFireSpeed: 0
 --- !u!4 &8332165835983157443 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2674686198616501390, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}

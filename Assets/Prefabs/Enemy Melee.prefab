@@ -17,6 +17,18 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2674686198616501390, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 2674686198616501390, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 2674686198616501390, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 2674686198616501390, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}
       propertyPath: m_LocalPosition.x
       value: 18.94
       objectReference: {fileID: 0}
@@ -182,7 +194,7 @@ CharacterController:
     m_Bits: 0
   m_LayerOverridePriority: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Height: 2
   m_Radius: 0.5
@@ -231,7 +243,7 @@ MonoBehaviour:
   creature: {fileID: 0}
   playerTransform: {fileID: 0}
   waypoints: []
-  lookRadius: 25
+  lookRadius: 5
   attackRange: 2
   attackCooldown: 0.3
 --- !u!195 &2988378174936657074
@@ -244,7 +256,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
-  m_Speed: 3.5
+  m_Speed: 1
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120

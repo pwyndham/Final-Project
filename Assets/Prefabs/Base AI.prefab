@@ -133,6 +133,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   healthBar: {fileID: 0}
   characterExperience: {fileID: 0}
+  baseMaterial: {fileID: 0}
+  hitMaterial: {fileID: 0}
   _health: 30
   _maxHealth: 30
   _experiencePoints: 30

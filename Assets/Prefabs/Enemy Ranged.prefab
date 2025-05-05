@@ -153,6 +153,18 @@ PrefabInstance:
       value: Enemy Ranged
       objectReference: {fileID: 0}
     - target: {fileID: 2674686198616501390, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 2674686198616501390, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 2674686198616501390, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 2674686198616501390, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}
       propertyPath: m_LocalPosition.x
       value: 18.7
       objectReference: {fileID: 0}
@@ -264,17 +276,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c23ce4c2eb95af49b96daf924fc6450, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &2833007199787990684 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 9124964230953091521, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}
-  m_PrefabInstance: {fileID: 6481453468923363165}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 311315841b9b8004dbb8bbb3d5a9788e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &6132954924828899950 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 931714695991051571, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}
@@ -296,7 +297,7 @@ CharacterController:
     m_Bits: 0
   m_LayerOverridePriority: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Height: 2
   m_Radius: 0.5
@@ -317,8 +318,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b24fa24057258d468eb7845bf6f87ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  healthBar: {fileID: 2833007199787990684}
+  healthBar: {fileID: 0}
   characterExperience: {fileID: 0}
+  baseMaterial: {fileID: 0}
+  hitMaterial: {fileID: 0}
   _health: 20
   _maxHealth: 20
   _experiencePoints: 20
@@ -342,7 +345,7 @@ MonoBehaviour:
   playerTransform: {fileID: 0}
   enemyProjectileController: {fileID: 0}
   waypoints: []
-  lookRadius: 20
+  lookRadius: 5
   attackRange: 15
   attackCooldown: 1
 --- !u!195 &793934340900422110
@@ -355,7 +358,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
-  m_Speed: 3.5
+  m_Speed: 1
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120
@@ -381,6 +384,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   projectilePrefab: {fileID: 8121366679860782352, guid: 8abbd178757732c42b80592962298e79, type: 3}
   projectilePoint: {fileID: 3825107943268941415}
+  scaledDamage: 0
+  scaledFireSpeed: 0
 --- !u!4 &9001811079911396307 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2674686198616501390, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}

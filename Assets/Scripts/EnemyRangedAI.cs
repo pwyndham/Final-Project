@@ -27,6 +27,20 @@ public class EnemyRangedAI : BaseAI
     private float lastAttackTime = 0f;
     private bool isPlayerAlive = true;
     
+
+    void Start()
+    {
+        if (attackCooldown <= 0)
+    {
+        Debug.LogWarning("Attack cooldown must be greater than 0. Defaulting to 1.");
+        attackCooldown = 1f;
+    }
+
+        if (PlayerController.Instance != null)
+        playerTransform = PlayerController.Instance.PlayerTransform;
+    else
+        Debug.LogWarning("Player not found.");
+    }
     protected void Awake()
     {
         base.Awake();
@@ -47,11 +61,18 @@ public class EnemyRangedAI : BaseAI
 
         float distance = Vector3.Distance(playerTransform.position, transform.position);
 
-        if (navMeshAgent.remainingDistance < 0.1f) { // If agent is close enough to destination
-            currentWaypoint = (currentWaypoint + 1) % waypoints.Length; // Go to next waypoint
-            //slerp this
-            transform.LookAt(waypoints[currentWaypoint].position);
-            navMeshAgent.SetDestination(waypoints[currentWaypoint].position); // Set new destination
+        if (waypoints != null && waypoints.Length > 0)
+        {
+            if (navMeshAgent.remainingDistance < 0.1f)
+            {
+                currentWaypoint = (currentWaypoint + 1) % waypoints.Length;
+                transform.LookAt(waypoints[currentWaypoint].position);
+                navMeshAgent.SetDestination(waypoints[currentWaypoint].position);
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"{gameObject.name} has no waypoints assigned!");
         }
 
         if (distance <= lookRadius)
@@ -120,22 +141,26 @@ public class EnemyRangedAI : BaseAI
     {
     stateImIn = "Player Dead State";
     
-    if (navMeshAgent.remainingDistance < 0.1f) { // If agent is close enough to destination
-            currentWaypoint = (currentWaypoint + 1) % waypoints.Length; // Go to next waypoint
-            //slerp this
-            transform.LookAt(waypoints[currentWaypoint].position);
-            navMeshAgent.SetDestination(waypoints[currentWaypoint].position); // Set new destination
+    if (waypoints != null && waypoints.Length > 0)
+        {
+            if (navMeshAgent.remainingDistance < 0.1f)
+            {
+                currentWaypoint = (currentWaypoint + 1) % waypoints.Length;
+                transform.LookAt(waypoints[currentWaypoint].position);
+                navMeshAgent.SetDestination(waypoints[currentWaypoint].position);
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"{gameObject.name} has no waypoints assigned!");
         }
 //coroutine for player respawn...
     
     }
     public void NullCheckPlayer()
     {
-        // if(playerTransform == null && !playerTransform.gameObject.activeInHierarchy)
-        // {
-        //     return;
-        // }
-        if (!playerTransform.gameObject.activeInHierarchy)
+
+        if (playerTransform == null || !playerTransform.gameObject.activeInHierarchy)
         {
             ChangeState(PlayerDeadState);
         }
