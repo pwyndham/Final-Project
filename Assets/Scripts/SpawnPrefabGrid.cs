@@ -21,6 +21,7 @@ public class SpawnPrefabGrid : MonoBehaviour
     private List<RoomData> roomPrefabs = new List<RoomData>();
     public List<GameObject> spawnedEnemies = new List<GameObject>();
     public GameObject waypointPrefab;
+    public GameObject lootPrefab;
 
     public GameObject enemyMelee;
     public GameObject enemyRanged;
@@ -43,6 +44,7 @@ public class SpawnPrefabGrid : MonoBehaviour
         public List<GameObject> enemyPrefabs = new List<GameObject>();
         public List<GameObject> lootPrefabs = new List<GameObject>();
         public List<Vector3> enemyOffsets = new List<Vector3>();
+        public List<Vector3> lootOffsets = new List<Vector3>();
         public List<Transform> roomWaypoints = new List<Transform>();
         
 
@@ -405,7 +407,23 @@ IEnumerator RespawnDungeon()
         return gridMap[x, z] == TileType.Hallway;
     }
     
-        
+    IEnumerator LootGenerator()
+    {
+        yield return new WaitForSeconds(2f);
+
+        foreach (RoomData room in roomPrefabs)
+            {
+                Vector3 basePos = new Vector3(room.x * gridSpacingOffset, 0, room.y * gridSpacingOffset);
+                for (int i = 0; i < room.lootPrefabs.Count; i++)
+                {
+                    Vector3 spawnPos = basePos + room.lootOffsets[i];
+                    GameObject enemy = Instantiate(room.lootPrefabs[i], spawnPos, Quaternion.identity);
+                    //spawnedLoot.Add(enemy);
+                    enemy.transform.parent = transform;
+
+                }
+            }
+    }
     IEnumerator EnemyGenerator()
     {
         // Wait for NavMesh baking to complete
@@ -568,6 +586,8 @@ IEnumerator RespawnDungeon()
                 room.enemyOffsets.Add(new Vector3(1, 0, 1));
                 room.enemyPrefabs.Add(enemyRanged);
                 room.enemyOffsets.Add(new Vector3(2, 0, 2));
+                room.lootPrefabs.Add(lootPrefab);
+                room.lootOffsets.Add(new Vector3(3,1,3));
                 break;
             }
                 
@@ -579,6 +599,7 @@ IEnumerator RespawnDungeon()
         IsGenerationComplete = true;
 
         StartCoroutine(EnemyGenerator()); 
+        StartCoroutine(LootGenerator());
         
     }
 

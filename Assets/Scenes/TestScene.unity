@@ -27597,6 +27597,7 @@ MonoBehaviour:
   - {fileID: 6718503658642207832, guid: 2dc8a17438b19bb47889dc907629829d, type: 3}
   spawnedEnemies: []
   waypointPrefab: {fileID: 5575253493826403803, guid: 5131e045636e9274a9654a36fa9d50b8, type: 3}
+  lootPrefab: {fileID: 1880192154181099929, guid: 1fbe687ad64132449a42841a116c4c23, type: 3}
   enemyMelee: {fileID: 5536936456726136702, guid: 11b3e1f9abf5ebe40b1668a18a217559, type: 3}
   enemyRanged: {fileID: 6132954924828899950, guid: 764a3f32c925396478d7056cb922c466, type: 3}
   enemyMage: {fileID: 6508182875639648638, guid: 6002655e34190cc46878ae9c176ed26a, type: 3}
