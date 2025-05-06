@@ -14,19 +14,23 @@ public class RuntimeNavMeshBaker : MonoBehaviour
         StartCoroutine(BakeWhenReady());
     }
 
-    IEnumerator BakeWhenReady()
-    {
-        yield return new WaitUntil(() => spawnPrefabGrid.IsGenerationComplete);
-       // yield return new WaitForSeconds(5f);
-        //yield return new WaitForEndOfFrame();
+    public bool IsBaked { get; private set; } = false;
 
-        surface.BuildNavMesh();
-        BakeComplete();
-    }
-    public bool BakeComplete()
-    {
-        Debug.Log("Bake complete");
-        return true;
-    }
+IEnumerator BakeWhenReady()
+{
+    yield return new WaitUntil(() => spawnPrefabGrid.IsGenerationComplete);  // Wait for generation
+    Debug.Log("[RuntimeNavMeshBaker] NavMesh generation complete.");
+
+    yield return new WaitForSeconds(2f);  // Give extra time for the NavMesh to finalize
+    surface.BuildNavMesh();  // Ensure NavMesh is built at this point
+    IsBaked = true;  // Mark as baked
+    BakeComplete();
+}
+
+public bool BakeComplete()
+{
+    Debug.Log("[RuntimeNavMeshBaker] NavMesh baking complete.");
+    return IsBaked;
+}
 
 }

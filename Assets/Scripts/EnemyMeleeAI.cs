@@ -54,11 +54,18 @@ void Start()
 
         float distance = Vector3.Distance(playerTransform.position, transform.position);
 
-        if (navMeshAgent.remainingDistance < 0.1f) { // If agent is close enough to destination
-            currentWaypoint = (currentWaypoint + 1) % waypoints.Length; // Go to next waypoint
-            //slerp this
-            transform.LookAt(waypoints[currentWaypoint].position);
-            navMeshAgent.SetDestination(waypoints[currentWaypoint].position); // Set new destination
+        if (waypoints != null && waypoints.Length > 0)
+        {
+            if (navMeshAgent.remainingDistance < 0.1f)
+            {
+                currentWaypoint = (currentWaypoint + 1) % waypoints.Length;
+                transform.LookAt(waypoints[currentWaypoint].position);
+                navMeshAgent.SetDestination(waypoints[currentWaypoint].position);
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"{gameObject.name} has no waypoints assigned!");
         }
 
         if (distance <= lookRadius)
@@ -135,11 +142,8 @@ void Start()
     }
     public void NullCheckPlayer()
     {
-        // if(playerTransform == null && !playerTransform.gameObject.activeInHierarchy)
-        // {
-        //     return;
-        // }
-        if (playerTransform == null|| !playerTransform.gameObject.activeInHierarchy)
+
+        if (playerTransform == null || !playerTransform.gameObject.activeInHierarchy)
         {
             ChangeState(PlayerDeadState);
         }

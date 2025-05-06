@@ -1,11 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
+using JetBrains.Annotations;
+
 //using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.AI;
 
 public class SpawnPrefabGrid : MonoBehaviour
 {
+    public Transform shopkeeperTransform;
     public RuntimeNavMeshBaker runtimeNavMeshBaker;
     public enum TileType { Empty, Room, Hallway, Door, Wall }
     private TileType[,] gridMap;
@@ -14,6 +17,7 @@ public class SpawnPrefabGrid : MonoBehaviour
     public GameObject[] GridPrefabs = new GameObject[4]; // 0 = Room, 1 = Hallway, 2 = Door
     private List<Vector2Int> roomCenters = new List<Vector2Int>();
     private List<RoomData> roomPrefabs = new List<RoomData>();
+    public List<GameObject> spawnedEnemies = new List<GameObject>();
     public GameObject waypointPrefab;
 
     public GameObject enemyMelee;
@@ -38,6 +42,7 @@ public class SpawnPrefabGrid : MonoBehaviour
         public List<GameObject> lootPrefabs = new List<GameObject>();
         public List<Vector3> enemyOffsets = new List<Vector3>();
         public List<Transform> roomWaypoints = new List<Transform>();
+        
 
         public RoomData(RoomSize size, int x, int y)
         {
@@ -65,12 +70,70 @@ public class SpawnPrefabGrid : MonoBehaviour
 
     void Start()
     {
+        
+        // Vector3 testSpawn = new Vector3(38, 0, 38); // somewhere known
+        // Instantiate(enemyMelee, testSpawn, Quaternion.identity);
+        // Debug.Log("Forced enemy spawn at (0,5,0)");
+
         gridMap = new TileType[(int)GridX, (int)GridZ];
         spawnedTiles = new GameObject[(int)GridX, (int)GridZ];
         SpawnGrid();
     }
+    private bool canCheckEnemies = false;
+private bool hasStartedCoroutine = false;
 
-    
+void Update()
+{
+    if (!hasStartedCoroutine)
+    {
+        StartCoroutine(HoldTeleporter());
+        hasStartedCoroutine = true;
+        return;
+    }
+
+    if (!canCheckEnemies) return;
+
+    spawnedEnemies.RemoveAll(e => e == null); // Clean up destroyed enemies
+
+    if (spawnedEnemies.Count <= 0)
+    {
+        Debug.Log("Teleport player");
+        TeleportPlayer(); // Your teleport function
+        canCheckEnemies = false; // Prevent repeat
+    }
+}
+    void TeleportPlayer()
+{
+    if (PlayerController.Instance != null)
+    {
+        CharacterController controller = PlayerController.Instance.GetComponent<CharacterController>();
+        //CharacterInput controller2 = PlayerController.Instance.GetComponent<CharacterInput>();
+
+        if (controller != null)
+        {
+            controller.enabled = false;
+            //controller2.enabled = false;
+            PlayerController.Instance.transform.position = shopkeeperTransform.position;
+            controller.enabled = true;
+        }
+        else
+        {
+            PlayerController.Instance.transform.position = shopkeeperTransform.position;
+        }
+
+        Debug.Log("Player teleported to " + shopkeeperTransform.position);
+    }
+    else
+    {
+        Debug.LogWarning("PlayerController.Instance is null");
+    }
+}
+IEnumerator HoldTeleporter()
+{
+    yield return new WaitForSeconds(5f);
+    canCheckEnemies = true;
+}
+
     private void PlaceWallIfNeeded(int x, int z, Quaternion rotation)
     {
         if (x < 0 || x >= GridX || z < 0 || z >= GridZ)
@@ -124,6 +187,7 @@ public class SpawnPrefabGrid : MonoBehaviour
 
         foreach (RoomData room in roomPrefabs)
         {
+            Debug.Log($"[EnemyGenerator] Room at ({room.x}, {room.y}) has {room.enemyPrefabs.Count} enemies.");
 
             List<Vector2Int> edgeCenters = new List<Vector2Int>
             {
@@ -156,10 +220,10 @@ public class SpawnPrefabGrid : MonoBehaviour
                 else if (IsHallway(x, z - 1)) rotation = Quaternion.Euler(0, 180, 0); // down
 
                 // Offset to make doors align properly
-                if (rotation == Quaternion.Euler(0, 180, 0)) offset = new Vector3(0, 0, -gridSpacingOffset / 2f);
-                else if (rotation == Quaternion.Euler(0, 0, 0)) offset = new Vector3(0, 0, gridSpacingOffset / 2f);
-                else if (rotation == Quaternion.Euler(0, -90, 0)) offset = new Vector3(-gridSpacingOffset / 2f, 0, 0);
-                else if (rotation == Quaternion.Euler(0, 90, 0)) offset = new Vector3(gridSpacingOffset / 2f, 0, 0);
+                if (rotation == Quaternion.Euler(0, 180, 0)) offset = new Vector3(0, 5, -gridSpacingOffset / 2f);
+                else if (rotation == Quaternion.Euler(0, 0, 0)) offset = new Vector3(0, 5, gridSpacingOffset / 2f);
+                else if (rotation == Quaternion.Euler(0, -90, 0)) offset = new Vector3(-gridSpacingOffset / 2f, 5, 0);
+                else if (rotation == Quaternion.Euler(0, 90, 0)) offset = new Vector3(gridSpacingOffset / 2f, 5, 0);
 
                 Vector3 newpos = pos + offset;
 
@@ -238,10 +302,12 @@ public class SpawnPrefabGrid : MonoBehaviour
         if (x < 0 || x >= gridMap.GetLength(0) || z < 0 || z >= gridMap.GetLength(1)) return false;
         return gridMap[x, z] == TileType.Hallway;
     }
-
+    
+        
     IEnumerator EnemyGenerator()
     {
-        yield return new WaitUntil(() => runtimeNavMeshBaker.BakeComplete());
+        // Wait for NavMesh baking to complete
+     yield return new WaitUntil(() => runtimeNavMeshBaker.BakeComplete());
 
         foreach (RoomData room in roomPrefabs)
             {
@@ -250,6 +316,7 @@ public class SpawnPrefabGrid : MonoBehaviour
                 {
                     Vector3 spawnPos = basePos + room.enemyOffsets[i];
                     GameObject enemy = Instantiate(room.enemyPrefabs[i], spawnPos, Quaternion.identity);
+                    spawnedEnemies.Add(enemy);
                     enemy.transform.parent = transform;
 
                     List<Transform> enemyWaypoints = new List<Transform>();
@@ -287,6 +354,7 @@ public class SpawnPrefabGrid : MonoBehaviour
                 }
             }
     }
+
 
     private bool AreRoomAndHallway(TileType a, TileType b)
     {
@@ -359,6 +427,7 @@ public class SpawnPrefabGrid : MonoBehaviour
                 roomCenters.Add(room.Center);
                 placed++;
             }
+            
 
             switch (size)
             {
@@ -370,9 +439,9 @@ public class SpawnPrefabGrid : MonoBehaviour
                 break;
                 case RoomSize.BaseRoom2: baseRoom2Count--; 
                 room.enemyPrefabs.Add(enemyRanged);
-                room.enemyOffsets.Add(new Vector3(1, 0, 1));
+                room.enemyOffsets.Add(new Vector3(0, 0, 0));
                 room.enemyPrefabs.Add(enemyRanged);
-                room.enemyOffsets.Add(new Vector3(2, 0, 2));
+                room.enemyOffsets.Add(new Vector3(0, 0, 0));
                 break;
                 case RoomSize.BaseRoom3: baseRoom3Count--; 
                 room.enemyPrefabs.Add(enemyMelee);
@@ -399,7 +468,7 @@ public class SpawnPrefabGrid : MonoBehaviour
                 room.enemyOffsets.Add(new Vector3(2, 0, 2));
                 break;
             }
-       
+                
         }
         
 
