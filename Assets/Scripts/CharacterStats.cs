@@ -17,6 +17,9 @@ public class CharacterStats : MonoBehaviour
     /// <summary>
     /// NOTE: ALL VALUES ARE FOR BASIS. CHANGE DUE TO STAT SYSTEM. NO NULLS
     /// </summary>
+    /// 
+    
+    public int characterMoney = 100;
 
     public float levelUpPoints;
     public float energyCost = 5f; // character input energy
@@ -368,6 +371,55 @@ public class CharacterStats : MonoBehaviour
         }
     }
 
+    public void UseManaPotion(float amount)
+    {
+        if (manaPoints < maxManaPoints)
+        {
+            manaPoints += amount;
+            if (manaPoints > maxManaPoints)
+            {
+                manaPoints = maxManaPoints;
+            }
+            Debug.Log("Mana potion used. Current Mana: " + manaPoints);
+        }
+        else
+        {
+            Debug.Log("Mana is already full!");
+        }
+    }
+    public void UseEnergyPotion(float amount)
+    {
+        if (energyPoints < maxEnergyPoints)
+        {
+            energyPoints += amount;
+            if (energyPoints > maxEnergyPoints)
+            {
+                energyPoints = maxEnergyPoints;
+            }
+            Debug.Log("energy potion used. Current energy: " + energyPoints);
+        }
+        else
+        {
+            Debug.Log("energy is already full!");
+        }
+    }
+    public void UseHealthPotion(float amount)
+    {
+        if (healthPoints < maxHealthPoints)
+        {
+            healthPoints += amount;
+            if (healthPoints > maxHealthPoints)
+            {
+                healthPoints = maxHealthPoints;
+            }
+            Debug.Log("Mana potion used. Current Mana: " + healthPoints);
+        }
+        else
+        {
+            Debug.Log("Mana is already full!");
+        }
+    }
+
     void RegenerateMana()
     {
         if (manaPoints < maxManaPoints)
@@ -411,5 +463,10 @@ public class CharacterStats : MonoBehaviour
     void OnDestroy()
     {
         characterExperience.OnLevelUp -= HandleLevelUp;
+    }
+
+    public void GiveMoney(int creatureMoney)
+    {
+        characterMoney += creatureMoney;
     }
 }

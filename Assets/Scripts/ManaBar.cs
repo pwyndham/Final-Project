@@ -27,7 +27,7 @@ public class ManaBar : MonoBehaviour
     }
     void Start()
     {
-        OnEnable();
+       // OnEnable();
         characterStats.ApplyStatCalculation();
     }
         

@@ -15,6 +15,8 @@ public abstract class Creature : MonoBehaviour
     
 
     [Header("Functional")]
+    public int creatureMoney = 50;
+    public CharacterStats characterStats;
     public CharacterExperience characterExperience;
     public virtual string creatureType => "Base Creature";
     public virtual int experiencePoints { get; protected set; } = 10;
@@ -39,6 +41,7 @@ public abstract class Creature : MonoBehaviour
         
         GameObject player = GameObject.FindWithTag("Player");
         if (player != null) {
+            characterStats = player.GetComponent<CharacterStats>();
             characterExperience = player.GetComponent<CharacterExperience>();
         }
 
@@ -85,6 +88,7 @@ public abstract class Creature : MonoBehaviour
     if (health <= 0)
         {
             Debug.Log(gameObject.name + " died.");
+            characterStats.GiveMoney(creatureMoney);
             Die(experiencePoints);
             Destroy(gameObject);
         }

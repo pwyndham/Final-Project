@@ -9,6 +9,8 @@ using UnityEngine.AI;
 public class SpawnPrefabGrid : MonoBehaviour
 {
     public Transform shopkeeperTransform;
+    public Transform dungeonTransform;
+    
     public RuntimeNavMeshBaker runtimeNavMeshBaker;
     public enum TileType { Empty, Room, Hallway, Door, Wall }
     private TileType[,] gridMap;
@@ -80,7 +82,8 @@ public class SpawnPrefabGrid : MonoBehaviour
         SpawnGrid();
     }
     private bool canCheckEnemies = false;
-private bool hasStartedCoroutine = false;
+    private bool canSpawnDungeon = false;
+    private bool hasStartedCoroutine = false;
 
 void Update()
 {
@@ -91,49 +94,148 @@ void Update()
         return;
     }
 
-    if (!canCheckEnemies) return;
+    // Check for key press before returning
+    if (Input.GetKeyDown(KeyCode.Alpha0))
+    {
+        Debug.Log("Pressed 0");
+        Debug.Log("Teleport player back");
+        StartCoroutine(RespawnDungeon());
+        return;
+    }
 
-    spawnedEnemies.RemoveAll(e => e == null); // Clean up destroyed enemies
+    // Only run this coroutine if not already checking
+    if (canCheckEnemies && !checkingEnemies)
+    {
+        StartCoroutine(RemoveDestroyedEnemies());
+    }
+}
+private bool checkingEnemies = false;
+    IEnumerator RemoveDestroyedEnemies()
+{
+    checkingEnemies = true;
+
+    yield return null; // Optional frame delay
+
+    spawnedEnemies.RemoveAll(e => e == null);
 
     if (spawnedEnemies.Count <= 0)
     {
         Debug.Log("Teleport player");
-        TeleportPlayer(); // Your teleport function
-        canCheckEnemies = false; // Prevent repeat
+        TeleportPlayer();
+        canCheckEnemies = false;
     }
-}
-    void TeleportPlayer()
-{
-    if (PlayerController.Instance != null)
-    {
-        CharacterController controller = PlayerController.Instance.GetComponent<CharacterController>();
-        //CharacterInput controller2 = PlayerController.Instance.GetComponent<CharacterInput>();
 
-        if (controller != null)
+    checkingEnemies = false;
+}
+
+    void TeleportPlayer()
+    {
+        if (PlayerController.Instance != null)
         {
-            controller.enabled = false;
-            //controller2.enabled = false;
-            PlayerController.Instance.transform.position = shopkeeperTransform.position;
-            controller.enabled = true;
+            CharacterController controller = PlayerController.Instance.GetComponent<CharacterController>();
+            //CharacterInput controller2 = PlayerController.Instance.GetComponent<CharacterInput>();
+
+            if (controller != null)
+            {
+                controller.enabled = false;
+                //controller2.enabled = false;
+                PlayerController.Instance.transform.position = shopkeeperTransform.position;
+                controller.enabled = true;
+            }
+            else
+            {
+                PlayerController.Instance.transform.position = shopkeeperTransform.position;
+            }
+
+            Debug.Log("Player teleported to " + shopkeeperTransform.position);
         }
         else
         {
-            PlayerController.Instance.transform.position = shopkeeperTransform.position;
+            Debug.LogWarning("PlayerController.Instance is null");
         }
-
-        Debug.Log("Player teleported to " + shopkeeperTransform.position);
     }
-    else
+    void TeleportBackPlayer()
     {
-        Debug.LogWarning("PlayerController.Instance is null");
+        if (PlayerController.Instance != null)
+        {
+            CharacterController controller = PlayerController.Instance.GetComponent<CharacterController>();
+            //CharacterInput controller2 = PlayerController.Instance.GetComponent<CharacterInput>();
+
+            if (controller != null)
+            {
+                controller.enabled = false;
+                //controller2.enabled = false;
+                PlayerController.Instance.transform.position = dungeonTransform.position;
+                controller.enabled = true;
+            }
+            else
+            {
+                PlayerController.Instance.transform.position = dungeonTransform.position;
+            }
+
+            Debug.Log("Player teleported to " + dungeonTransform.position);
+        }
+        else
+        {
+            Debug.LogWarning("PlayerController.Instance is null");
+        }
     }
-}
 IEnumerator HoldTeleporter()
 {
     yield return new WaitForSeconds(5f);
     canCheckEnemies = true;
 }
 
+// IEnumerator RespawnDungeon()
+// {
+//     yield return new WaitForSeconds(5f);
+//     canCheckEnemies = false;
+// }
+
+IEnumerator RespawnDungeon()
+{
+    yield return new WaitForSeconds(1f); // Optional delay before destroying
+
+    // 1. Destroy tiles
+    for (int x = 0; x < GridX; x++)
+    {
+        for (int z = 0; z < GridZ; z++)
+        {
+            if (spawnedTiles[x, z] != null)
+            {
+                Destroy(spawnedTiles[x, z]);
+                spawnedTiles[x, z] = null;
+            }
+        }
+    }
+
+    // 2. Destroy enemies
+    foreach (GameObject enemy in spawnedEnemies)
+    {
+        if (enemy != null)
+        {
+            Destroy(enemy);
+        }
+    }
+    spawnedEnemies.Clear();
+
+    // 3. Reset state
+    gridMap = new TileType[(int)GridX, (int)GridZ];
+    canCheckEnemies = false;
+    hasStartedCoroutine = false;
+
+    yield return new WaitForSeconds(2f); // Let terrain respawn first
+
+    Debug.Log("Respawning dungeon");
+    SpawnGrid();
+
+    yield return null; // Wait one frame to let physics settle
+
+    TeleportBackPlayer(); 
+
+    yield return new WaitForSeconds(2f); // Let enemies spawn
+    canCheckEnemies = true;
+}
     private void PlaceWallIfNeeded(int x, int z, Quaternion rotation)
     {
         if (x < 0 || x >= GridX || z < 0 || z >= GridZ)

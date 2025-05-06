@@ -3,9 +3,11 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
+public enum PotionType { Mana, Health, Energy }
 public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     //public Item item;
+    public PotionType potionType;
     public Image image;
     public Transform originalParentReference;
     void Start()
