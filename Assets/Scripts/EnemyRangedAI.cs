@@ -60,7 +60,7 @@ public class EnemyRangedAI : BaseAI
         NullCheckPlayer();
         stateImIn = "Roaming State";
 
-        creature.animationStateChanger.ChangeAnimation("CharacterWalk");
+        creature.animationStateChanger.ChangeAnimation("CharacterEnemyRangedWalk");
 
         float distance = Vector3.Distance(playerTransform.position, transform.position);
 
@@ -89,8 +89,8 @@ public class EnemyRangedAI : BaseAI
 
         NullCheckPlayer();
 
-        creature.animationStateChanger.ChangeAnimation("CharacterWalk");
-        
+        creature.animationStateChanger.ChangeAnimation("CharacterEnemyRangedWalk");
+
         stateImIn = "Found Player State";
 
         navMeshAgent.SetDestination(playerTransform.position);
@@ -119,7 +119,7 @@ public class EnemyRangedAI : BaseAI
 
         NullCheckPlayer();
 
-        creature.animationStateChanger.ChangeAnimation("CharacterMagicAttack");
+        creature.animationStateChanger.ChangeAnimation("CharacterEnemyRangedAttack");
 
         stateImIn = "Attack State";
 
@@ -147,7 +147,7 @@ public class EnemyRangedAI : BaseAI
     {
     stateImIn = "Player Dead State";
     
-    creature.animationStateChanger.ChangeAnimation("CharacterIdle");
+    creature.animationStateChanger.ChangeAnimation("CharacterEnemyRangedIdle");
 
     if (waypoints != null && waypoints.Length > 0)
         {

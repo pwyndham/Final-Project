@@ -52,7 +52,7 @@ void Start()
         NullCheckPlayer();
         stateImIn = "Roaming State";
 
-        creature.animationStateChanger.ChangeAnimation("CharacterWalk");
+        creature.animationStateChanger.ChangeAnimation("CharacterEnemyMeleeWalk");
 
         float distance = Vector3.Distance(playerTransform.position, transform.position);
 
@@ -84,7 +84,7 @@ void Start()
 
         stateImIn = "Attack State";
 
-        creature.animationStateChanger.ChangeAnimation("CharacterMeleeAttack");
+        creature.animationStateChanger.ChangeAnimation("CharacterEnemyMeleeAttack");
 
         float distance = Vector3.Distance(playerTransform.position, transform.position);
         
@@ -112,7 +112,7 @@ void Start()
 
         stateImIn = "Found Player State";
 
-        creature.animationStateChanger.ChangeAnimation("CharacterWalk");
+        creature.animationStateChanger.ChangeAnimation("CharacterEnemyMeleeWalk");
 
         navMeshAgent.SetDestination(playerTransform.position);
         
@@ -138,7 +138,7 @@ void Start()
     {
     stateImIn = "Player Dead State";
 
-    creature.animationStateChanger.ChangeAnimation("CharacterIdle");
+    creature.animationStateChanger.ChangeAnimation("CharacterEnemyMeleeIdle");
 
     if (navMeshAgent.remainingDistance < 0.1f) { // If agent is close enough to destination
             currentWaypoint = (currentWaypoint + 1) % waypoints.Length; // Go to next waypoint
