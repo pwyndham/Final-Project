@@ -34,18 +34,19 @@ public class RangedCreature : Creature
     public override void Move(Vector3 direction)
     {   
         if(direction == Vector3.zero) {
-            animationStateChanger.ChangeAnimation("Enemy Idle");
+            //animationStateChanger.ChangeAnimation("CharacterIdle");
             return;
         }
         direction.Normalize();
-        animationStateChanger.ChangeAnimation("EnemyRangedAttack");
         characterController.Move(direction * speed * Time.deltaTime);
     }
 
     public override void MoveToward(Vector3 target)
     {
+        //animationStateChanger.ChangeAnimation("CharacterWalk");
         Vector3 direction = target - transform.position;
         Move(direction);
+        //animationStateChanger.ChangeAnimation("CharacterWalk");
     }
     protected override void Awake()
     {
@@ -60,7 +61,7 @@ public class RangedCreature : Creature
 
     public override void Stop()
     {
-        animationStateChanger.ChangeAnimation("Enemy Idle");
+        //animationStateChanger.ChangeAnimation("Enemy Idle");
     }
 
     public void Die(){}

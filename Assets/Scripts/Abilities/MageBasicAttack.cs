@@ -3,13 +3,20 @@ using System.Collections;
 using UnityEditor.Rendering.Universal;
 public class MageBasicAttack : Ability
 {
+    public string animationName;
     CharacterStats characterStats;
     public GameObject projectilePrefab;
+     CharacterInput charInput; 
     public Transform projectilePoint;
     bool onCooldown = false;
+    void Start()
+    {
+        animationName = "CharacterMagicAttack";
+    }
     void Awake() {
+        charInput = GetComponent<CharacterInput>();
         abilityName = "MageBasicAttack";
-        abilityCooldown = 0;
+        abilityCooldown = 2;
         abilityDescription = "Mages shoot a burst of pure magic";
         characterStats = GetComponent<CharacterStats>();
         Debug.Log("This character has the light shot ability");
@@ -37,7 +44,9 @@ public class MageBasicAttack : Ability
 
     private void TryMageBasicAttack()
     {
+        
         ShootProjectile();
+        // StartCoroutine(PlayAttackAnimation());
         // damage adjustments
         // animation
         // light particle
@@ -79,4 +88,6 @@ public class MageBasicAttack : Ability
             
         }
     }
+
+    
 }

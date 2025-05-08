@@ -583,9 +583,9 @@ IEnumerator RespawnDungeon()
                 break;
                 case RoomSize.ArmoryRoom: armoryRoomCount--; 
                 room.enemyPrefabs.Add(enemyMage);
-                room.enemyOffsets.Add(new Vector3(1, 0, 1));
+                room.enemyOffsets.Add(new Vector3(1, 1, 1));
                 room.enemyPrefabs.Add(enemyRanged);
-                room.enemyOffsets.Add(new Vector3(2, 0, 2));
+                room.enemyOffsets.Add(new Vector3(2, 1, 2));
                 room.lootPrefabs.Add(lootPrefab);
                 room.lootOffsets.Add(new Vector3(3,1,3));
                 break;

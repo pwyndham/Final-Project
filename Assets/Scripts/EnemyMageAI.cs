@@ -53,6 +53,7 @@ public class EnemyMageAI : BaseAI
 
         NullCheckPlayer();
         stateImIn = "Roaming State";
+        creature.animationStateChanger.ChangeAnimation("CharacterWalk");
 
         float distance = Vector3.Distance(playerTransform.position, transform.position);
 
@@ -81,6 +82,7 @@ public class EnemyMageAI : BaseAI
 
         NullCheckPlayer();
         stateImIn = "Found Player State";
+        creature.animationStateChanger.ChangeAnimation("CharacterWalk");
 
         navMeshAgent.SetDestination(playerTransform.position);
         
@@ -107,7 +109,7 @@ public class EnemyMageAI : BaseAI
 
         NullCheckPlayer();
 
-
+        creature.animationStateChanger.ChangeAnimation("CharacterWalk");
 
         stateImIn = "Attack State";
         
@@ -133,6 +135,9 @@ public class EnemyMageAI : BaseAI
     public void PlayerDeadState()
     {
     stateImIn = "Player Dead State";
+
+    creature.animationStateChanger.ChangeAnimation("CharacterWalk");
+    
     if (waypoints != null && waypoints.Length > 0)
         {
             if (navMeshAgent.remainingDistance < 0.1f)

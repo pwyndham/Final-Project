@@ -4,7 +4,7 @@ public abstract class Creature : MonoBehaviour
 {
     [Header("Movement")]
     protected CharacterController characterController;
-    protected AnimationStateChanger animationStateChanger;
+    public AnimationStateChanger animationStateChanger;
     public virtual float speed { get; protected set; } = 5f;
 
     [Header("Health")]

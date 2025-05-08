@@ -12,5 +12,6 @@ public abstract class Ability : MonoBehaviour
     public int abilityCooldown;
     public Image abilityIcon;
     public abstract void Activate();
+    
 
 }

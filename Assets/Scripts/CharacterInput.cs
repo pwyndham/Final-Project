@@ -4,18 +4,19 @@ using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 public class CharacterInput : MonoBehaviour
 {
     
     public Dash dashAbility;
-    // public Character character;
-    // public Transform cameraTransform;
-    public List<CharacterAbilities> characterAbilities;
+    CharacterAbilities characterAbilities;
 
     public GameObject MainMenuUI;
     public GameObject characterStatsUI;
     public GameObject abilitiesUI;
+
+    PlayerAnimationStateChanger playerAnimationStateChanger;
 
     float xInput;
     float yInput;
@@ -32,7 +33,6 @@ public class CharacterInput : MonoBehaviour
     public LayerMask terrainLayers;
 
     
-
     Vector3 playerInput;
     Vector3 cameraRelativeMovement;
 
@@ -43,14 +43,17 @@ public class CharacterInput : MonoBehaviour
 
     public CharacterStats characterStats;
     [SerializeField] CharacterController characterController;
+    
  
 
 
     void Awake() 
     {
+        characterAbilities = GetComponent<CharacterAbilities>();
         dashAbility = GetComponent<Dash>();
         characterStats = GetComponent<CharacterStats>();
         characterController = GetComponent<CharacterController>();
+        playerAnimationStateChanger = GetComponent<PlayerAnimationStateChanger>();
     }
  
     void Update()
@@ -71,12 +74,82 @@ public class CharacterInput : MonoBehaviour
 
         cameraRelativeMovement = ConvertToCameraSpace(playerInput);
 
+        HandleAnimationState();
+
         PlayerSprint();
-        characterController.Move(cameraRelativeMovement * characterStats.CharacterSpeed * Time.deltaTime);
+        CallMove();
+        
         
         OpenMenu();
         OpenStats();
         OpenAbilities();
+    }
+    private void CallMove()
+    {
+        characterController.Move(cameraRelativeMovement * characterStats.CharacterSpeed * Time.deltaTime);
+    }
+
+    public bool isMagicAttack = false;
+    public bool isMeleeAttack = false;
+    void HandleAnimationState()
+    {
+        Debug.Log("Current animation: " + playerAnimationStateChanger.currentState + " | Locked: " + playerAnimationStateChanger.overrideLocked);
+        if (playerAnimationStateChanger.overrideLocked)
+        return;
+        
+
+        if (!CharacterOnGround())
+        {
+            playerAnimationStateChanger.ChangeAnimation("CharacterJump");
+            return;
+        }
+         
+            if (Input.GetKey(KeyCode.Mouse0) &&  characterStats.classTypeCached == "Mage Class")
+            {
+                //Debug.Log(characterAbilities.abilities[0].ToString());
+                playerAnimationStateChanger.ChangeAnimation("CharacterMagicAttack");
+                return;
+            }
+            if (Input.GetKey(KeyCode.Q) &&  characterStats.classTypeCached == "Mage Class")
+            {
+                //Debug.Log(characterAbilities.abilities[0].ToString());
+                playerAnimationStateChanger.ChangeAnimation("CharacterMagicAttack");
+                return;
+            }
+            if (Input.GetKey(KeyCode.E) &&  characterStats.classTypeCached == "Mage Class")
+            {
+                //Debug.Log(characterAbilities.abilities[0].ToString());
+                playerAnimationStateChanger.ChangeAnimation("CharacterMagicAttack");
+                return;
+            }
+            else if (Input.GetKey(KeyCode.Mouse0) &&  characterStats.classTypeCached == "Warrior Class")
+            {
+                playerAnimationStateChanger.ChangeAnimation("CharacterMeleeAttack");
+                return;
+            }
+            else if (Input.GetKey(KeyCode.Mouse0) &&  characterStats.classTypeCached == "Rogue Class")
+            {
+                playerAnimationStateChanger.ChangeAnimation("CharacterMeleeAttack");
+                return;
+            }
+        
+        
+        if (playerInput.magnitude > 0.1f)
+        {
+            if (Input.GetKey(KeyCode.LeftShift) && canSprint && characterStats.energyPoints > 0f)
+            {
+                playerAnimationStateChanger.ChangeAnimation("CharacterSprint");
+            }
+            else
+            {
+                playerAnimationStateChanger.ChangeAnimation("CharacterWalk");
+            }
+        }
+        else
+        {
+            playerAnimationStateChanger.ChangeAnimation("CharacterIdle");
+        }
+        
     }
 
     private void OpenStats()
@@ -155,8 +228,10 @@ public class CharacterInput : MonoBehaviour
 
     void PlayerSprint() 
     {
+        
         if(Input.GetKey(KeyCode.LeftShift) && canSprint && characterStats.energyPoints > 0f)
          {
+            //playerAnimationStateChanger.ChangeAnimation("CharacterSprint");
             characterStats.CharacterSpeed = characterStats.SprintSpeed;
             characterStats.UseEnergy(characterStats.EnergyCost * Time.deltaTime); // flat energy usage
 
@@ -170,6 +245,7 @@ public class CharacterInput : MonoBehaviour
          {
             if(Input.GetKeyUp(KeyCode.LeftShift) && canSprint )
             {
+            //playerAnimationStateChanger.ChangeAnimation("CharacterWalk");
             characterStats.CharacterSpeed = characterStats.DefaultSpeed;
             }
             if (!canSprint && characterStats.energyPoints >= characterStats.maxEnergyPoints) // basic timer to disallow sprinting unless refilled completely
@@ -183,7 +259,7 @@ public class CharacterInput : MonoBehaviour
     {
         if(Input.GetKey(KeyCode.Space) && characterStats.energyPoints > 0f) 
         {
-
+            //playerAnimationStateChanger.ChangeAnimation("CharacterJump");
             if (CharacterOnGround()) {
                 jumpsLeft = maxJumps;
                 gravityVelocity.y = 0;

@@ -16,6 +16,7 @@ public class EnemyRangedAI : BaseAI
     NavMeshAgent navMeshAgent;
     [SerializeField] Transform playerTransform;
     public EnemyProjectileController enemyProjectileController;
+    //AnimationStateChanger animationStateChanger;
 
     public Transform[] waypoints;  // Array of waypoint game objects
     private int currentWaypoint = 0;
@@ -59,6 +60,8 @@ public class EnemyRangedAI : BaseAI
         NullCheckPlayer();
         stateImIn = "Roaming State";
 
+        creature.animationStateChanger.ChangeAnimation("CharacterWalk");
+
         float distance = Vector3.Distance(playerTransform.position, transform.position);
 
         if (waypoints != null && waypoints.Length > 0)
@@ -86,6 +89,8 @@ public class EnemyRangedAI : BaseAI
 
         NullCheckPlayer();
 
+        creature.animationStateChanger.ChangeAnimation("CharacterWalk");
+        
         stateImIn = "Found Player State";
 
         navMeshAgent.SetDestination(playerTransform.position);
@@ -114,16 +119,17 @@ public class EnemyRangedAI : BaseAI
 
         NullCheckPlayer();
 
+        creature.animationStateChanger.ChangeAnimation("CharacterMagicAttack");
 
         stateImIn = "Attack State";
 
         float distance = Vector3.Distance(playerTransform.position, transform.position);
         
         if (Time.time - lastAttackTime >= attackCooldown)
-    {
-        enemyProjectileController.ShootProjectile(playerTransform.position);
-        lastAttackTime = Time.time;
-    }
+        {
+            enemyProjectileController.ShootProjectile(playerTransform.position);
+            lastAttackTime = Time.time;
+        }
         //enemyProjectileController.ShootProjectile(playerTransform.position);
          //Debug.Log("Attacking Player");
          //attack logic
@@ -141,6 +147,8 @@ public class EnemyRangedAI : BaseAI
     {
     stateImIn = "Player Dead State";
     
+    creature.animationStateChanger.ChangeAnimation("CharacterIdle");
+
     if (waypoints != null && waypoints.Length > 0)
         {
             if (navMeshAgent.remainingDistance < 0.1f)

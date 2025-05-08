@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class CharacterAbilities : MonoBehaviour
 {
-
+    private PlayerAnimationStateChanger playerAnimationStateChanger;
     public List<Ability> abilities = new List<Ability>();
     Ability ability;
     public void AssignAbilities(string classType)
@@ -68,6 +68,11 @@ public class CharacterAbilities : MonoBehaviour
         {
             abilities[2].Activate();
         }
+    }
+
+    void Awake()
+    {
+        playerAnimationStateChanger = GetComponent<PlayerAnimationStateChanger>();
     }
 
     // private void UseAbility()
