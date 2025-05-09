@@ -26,7 +26,7 @@ public class CharacterStatsUI : MonoBehaviour
     }
     void UpdateText()
     {
-        levelUpPointsText.text = "Level Up Points: " + characterStats.levelUpPoints.ToString();
+        levelUpPointsText.text = "Level Up \nPoints: " + characterStats.levelUpPoints.ToString();
         characterClassText.text = "Character Class: " + characterStats.characterClass.ToString();
         characterStrengthText.text = "Strength: " + characterStats.characterClass.strength.ToString();
         characterIntelligenceText.text = "Intelligence: " + characterStats.characterClass.intelligence.ToString();

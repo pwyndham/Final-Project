@@ -133,7 +133,7 @@ void Update()
         StartCoroutine(RespawnDungeon());
         return;
     }
-    if (Input.GetKeyDown(KeyCode.Alpha1))
+    if (Input.GetKeyDown(KeyCode.Alpha4))
     {
         Debug.Log("Pressed 0");
         Debug.Log("Teleport player back");
