@@ -8,8 +8,16 @@ using UnityEngine.AI;
 
 public class SpawnPrefabGrid : MonoBehaviour
 {
+     public int initialbaseRoom1Count = 1;
+    public int initialbaseRoom2Count = 1;
+    public int initialbaseRoom3Count = 0;
+    public int initiallootRoomCount = 0;
+    public int initialbarracksRoomCount = 0;
+    public int initialarmoryRoomCount = 1;
     public Transform shopkeeperTransform;
     public Transform dungeonTransform;
+    public Transform lossDungeonTransform;
+    public Transform bossDungeonTransform;
     
     public RuntimeNavMeshBaker runtimeNavMeshBaker;
     public enum TileType { Empty, Room, Hallway, Door, Wall }
@@ -20,6 +28,9 @@ public class SpawnPrefabGrid : MonoBehaviour
     private List<Vector2Int> roomCenters = new List<Vector2Int>();
     private List<RoomData> roomPrefabs = new List<RoomData>();
     public List<GameObject> spawnedEnemies = new List<GameObject>();
+    List<GameObject> spawnedWalls = new List<GameObject>();
+    List<GameObject> spawnedDoors = new List<GameObject>();
+    List<GameObject> spawnedHalls = new List<GameObject>();
     public GameObject waypointPrefab;
     public GameObject lootPrefab;
 
@@ -34,6 +45,8 @@ public class SpawnPrefabGrid : MonoBehaviour
     public int barracksRoomCount = 1;
     public int armoryRoomCount = 1;
 
+    
+
     public enum RoomSize { BaseRoom1, BaseRoom2, BaseRoom3, LootRoom, ArmoryRoom, BarracksRoom, None }
 
     public class RoomData
@@ -46,6 +59,7 @@ public class SpawnPrefabGrid : MonoBehaviour
         public List<Vector3> enemyOffsets = new List<Vector3>();
         public List<Vector3> lootOffsets = new List<Vector3>();
         public List<Transform> roomWaypoints = new List<Transform>();
+        
         
 
         public RoomData(RoomSize size, int x, int y)
@@ -62,6 +76,21 @@ public class SpawnPrefabGrid : MonoBehaviour
                 case RoomSize.ArmoryRoom: width = 7; height = 5; break;
                 case RoomSize.BarracksRoom: width = 11; height = 7; break;
             }
+        }
+
+        public RoomData Clone()
+        {
+            RoomData clone = new RoomData(this.size, this.x, this.y)
+            {
+                width = this.width,
+                height = this.height,
+                enemyPrefabs = new List<GameObject>(this.enemyPrefabs),
+                lootPrefabs = new List<GameObject>(this.lootPrefabs),
+                enemyOffsets = new List<Vector3>(this.enemyOffsets),
+                lootOffsets = new List<Vector3>(this.lootOffsets),
+                roomWaypoints = new List<Transform>(this.roomWaypoints)
+            };
+            return clone;
         }
 
         public Vector2Int Center => new Vector2Int(x + width / 2, y + height / 2);
@@ -104,6 +133,13 @@ void Update()
         StartCoroutine(RespawnDungeon());
         return;
     }
+    if (Input.GetKeyDown(KeyCode.Alpha1))
+    {
+        Debug.Log("Pressed 0");
+        Debug.Log("Teleport player back");
+        StartCoroutine(BossTeleporter());
+        return;
+    }
 
     // Only run this coroutine if not already checking
     if (canCheckEnemies && !checkingEnemies)
@@ -129,8 +165,39 @@ private bool checkingEnemies = false;
 
     checkingEnemies = false;
 }
+    IEnumerator BossTeleporter()
+    {
+        yield return new WaitForSeconds(2f);
+        TeleportPlayerToBoss();
+    }
+    void TeleportPlayerToBoss() //boss
+    {
+        if (PlayerController.Instance != null)
+        {
+            CharacterController controller = PlayerController.Instance.GetComponent<CharacterController>();
+            //CharacterInput controller2 = PlayerController.Instance.GetComponent<CharacterInput>();
 
-    void TeleportPlayer()
+            if (controller != null)
+            {
+                controller.enabled = false;
+                //controller2.enabled = false;
+                PlayerController.Instance.transform.position = bossDungeonTransform.position;
+                controller.enabled = true;
+            }
+            else
+            {
+                PlayerController.Instance.transform.position = bossDungeonTransform.position;
+            }
+
+            Debug.Log("Player teleported to " + bossDungeonTransform.position);
+        }
+        else
+        {
+            Debug.LogWarning("PlayerController.Instance is null");
+        }
+    }
+    
+    void TeleportPlayer() //shop
     {
         if (PlayerController.Instance != null)
         {
@@ -156,7 +223,7 @@ private bool checkingEnemies = false;
             Debug.LogWarning("PlayerController.Instance is null");
         }
     }
-    void TeleportBackPlayer()
+    void TeleportBackPlayer() //dungeon redo
     {
         if (PlayerController.Instance != null)
         {
@@ -188,17 +255,17 @@ IEnumerator HoldTeleporter()
     canCheckEnemies = true;
 }
 
-// IEnumerator RespawnDungeon()
-// {
-//     yield return new WaitForSeconds(5f);
-//     canCheckEnemies = false;
-// }
+
 
 IEnumerator RespawnDungeon()
 {
-    yield return new WaitForSeconds(1f); // Optional delay before destroying
-
-    // 1. Destroy tiles
+    yield return new WaitForSeconds(3f);
+    
+    // Clear all lists
+    roomCenters.Clear();
+    roomPrefabs.Clear();
+    
+    // Clear existing tiles and grid
     for (int x = 0; x < GridX; x++)
     {
         for (int z = 0; z < GridZ; z++)
@@ -208,34 +275,35 @@ IEnumerator RespawnDungeon()
                 Destroy(spawnedTiles[x, z]);
                 spawnedTiles[x, z] = null;
             }
+            gridMap[x, z] = TileType.Empty;
         }
     }
-
-    // 2. Destroy enemies
-    foreach (GameObject enemy in spawnedEnemies)
-    {
-        if (enemy != null)
-        {
-            Destroy(enemy);
-        }
-    }
+    
+    // Clear all spawned objects
+    foreach (GameObject hall in spawnedHalls) { if (hall != null) Destroy(hall); }
+    foreach (GameObject enemy in spawnedEnemies) { if (enemy != null) Destroy(enemy); }
+    foreach (GameObject wall in spawnedWalls) { if (wall != null) Destroy(wall); }
+    foreach (GameObject door in spawnedDoors) { if (door != null) Destroy(door); }
+    
+    spawnedHalls.Clear();
     spawnedEnemies.Clear();
-
-    // 3. Reset state
+    spawnedWalls.Clear();
+    spawnedDoors.Clear();
+    
+    // Reset the grid
     gridMap = new TileType[(int)GridX, (int)GridZ];
-    canCheckEnemies = false;
-    hasStartedCoroutine = false;
-
-    yield return new WaitForSeconds(2f); // Let terrain respawn first
-
-    Debug.Log("Respawning dungeon");
+    
+    // Reset room counts to initial values
+    // Add these variables at the class level if you haven't already
+    baseRoom1Count = initialbaseRoom1Count;
+    baseRoom2Count = initialbaseRoom2Count;
+    baseRoom3Count = initialbaseRoom3Count;
+    lootRoomCount = initiallootRoomCount;
+    barracksRoomCount = initialbarracksRoomCount;
+    armoryRoomCount = initialarmoryRoomCount;
+    
     SpawnGrid();
-
-    yield return null; // Wait one frame to let physics settle
-
-    TeleportBackPlayer(); 
-
-    yield return new WaitForSeconds(2f); // Let enemies spawn
+    TeleportBackPlayer();
     canCheckEnemies = true;
 }
     private void PlaceWallIfNeeded(int x, int z, Quaternion rotation)
@@ -246,7 +314,7 @@ IEnumerator RespawnDungeon()
         if (gridMap[x, z] != TileType.Empty) // place only on empty tiles
         return;
 
-    Vector3 pos = new Vector3(x * gridSpacingOffset, 0, z * gridSpacingOffset);
+    Vector3 pos = new Vector3(x * gridSpacingOffset, 0, z * gridSpacingOffset) + GridOrigin;
     Vector3 offset = Vector3.zero;
 
         if (rotation == Quaternion.Euler(0, 180, 0)) offset = new Vector3(0, 0, -gridSpacingOffset / 2f);
@@ -256,6 +324,7 @@ IEnumerator RespawnDungeon()
 
     Vector3 newpos = pos + offset;
     GameObject wall = Instantiate(GridPrefabs[3], newpos, rotation);
+    spawnedWalls.Add(wall);
     wall.transform.parent = transform;
 
 
@@ -263,6 +332,7 @@ IEnumerator RespawnDungeon()
 
     private void SpawnGrid()
     {
+        
         GenerateMapData();
 
         // Spawn Room/Hallway
@@ -277,10 +347,13 @@ IEnumerator RespawnDungeon()
                 {
                     case TileType.Empty: break;
                     case TileType.Room: go = Instantiate(GridPrefabs[0], pos, Quaternion.identity); 
+                    gridMap[x, z] = TileType.Room;
                     go.layer = LayerMask.NameToLayer("Walkable");break;
                     case TileType.Hallway: go = Instantiate(GridPrefabs[1], pos, Quaternion.identity); 
+                    gridMap[x, z] = TileType.Hallway;
                     go.layer = LayerMask.NameToLayer("Terrain");break; // different layer to prevent wall clipping. 
                     case TileType.Door: go = Instantiate(GridPrefabs[2], pos, Quaternion.identity); 
+                    gridMap[x, z] = TileType.Door;
                     go.layer = LayerMask.NameToLayer("Walkable");break;
                 }
 
@@ -288,6 +361,8 @@ IEnumerator RespawnDungeon()
 
             }
         }
+
+    
 
         foreach (RoomData room in roomPrefabs)
         {
@@ -332,11 +407,13 @@ IEnumerator RespawnDungeon()
                 Vector3 newpos = pos + offset;
 
                 GameObject door = Instantiate(GridPrefabs[4], newpos, rotation);
+                spawnedDoors.Add(door);
+                gridMap[x, z] = TileType.Door;
                 spawnedTiles[x, z] = door;
 
                 GameObject doorTile = Instantiate(GridPrefabs[2], pos, rotation);
                 spawnedTiles[x, z] = doorTile;
-                gridMap[x, z] = TileType.Door;
+                // gridMap[x, z] = TileType.Door;
 
             }
 
@@ -413,7 +490,7 @@ IEnumerator RespawnDungeon()
 
         foreach (RoomData room in roomPrefabs)
             {
-                Vector3 basePos = new Vector3(room.x * gridSpacingOffset, 0, room.y * gridSpacingOffset);
+                Vector3 basePos = new Vector3(room.x * gridSpacingOffset, 0, room.y * gridSpacingOffset) + GridOrigin;
                 for (int i = 0; i < room.lootPrefabs.Count; i++)
                 {
                     Vector3 spawnPos = basePos + room.lootOffsets[i];
@@ -431,7 +508,7 @@ IEnumerator RespawnDungeon()
 
         foreach (RoomData room in roomPrefabs)
             {
-                Vector3 basePos = new Vector3(room.x * gridSpacingOffset, 0, room.y * gridSpacingOffset);
+                Vector3 basePos = new Vector3(room.x * gridSpacingOffset, 0, room.y * gridSpacingOffset) + GridOrigin;
                 for (int i = 0; i < room.enemyPrefabs.Count; i++)
                 {
                     Vector3 spawnPos = basePos + room.enemyOffsets[i];
@@ -484,8 +561,8 @@ IEnumerator RespawnDungeon()
 
     private void PlaceWallBetween(int x1, int z1, int x2, int z2)
     {
-        Vector3 center1 = new Vector3(x1 * gridSpacingOffset, 0, z1 * gridSpacingOffset);
-        Vector3 center2 = new Vector3(x2 * gridSpacingOffset, 0, z2 * gridSpacingOffset);
+        Vector3 center1 = new Vector3(x1 * gridSpacingOffset, 0, z1 * gridSpacingOffset) + GridOrigin;
+        Vector3 center2 = new Vector3(x2 * gridSpacingOffset, 0, z2 * gridSpacingOffset) + GridOrigin;
 
         Vector3 midPoint = (center1 + center2) / 2f;
         Quaternion rotation;
@@ -496,19 +573,21 @@ IEnumerator RespawnDungeon()
             rotation = Quaternion.Euler(0, 0, 0);
 
         GameObject wall = Instantiate(GridPrefabs[3], midPoint, rotation);
+        spawnedWalls.Add(wall);
         wall.transform.parent = transform;
     }
 
+    public bool canPlace = false;
     public bool IsGenerationComplete {get; private set;} = false;
     private void GenerateMapData()
     {
-
+        
         int startX = (int)GridX / 2;
         int startZ = (int)GridZ / 2;
         RoomData startingRoom = new RoomData(RoomSize.BaseRoom1, startX, startZ);
 
         // Ensure the grid space is empty
-        bool canPlace = true;
+        canPlace = true;
         for (int x = startingRoom.x; x < startingRoom.x + startingRoom.width && canPlace; x++)
         {
             for (int z = startingRoom.y; z < startingRoom.y + startingRoom.height && canPlace; z++)
@@ -541,13 +620,17 @@ IEnumerator RespawnDungeon()
 
             // Decrement the room count
             RoomData room = TryPlaceRoom(size);
+            
             if (room != null)
             {
-                roomPrefabs.Add(room);
-                roomCenters.Add(room.Center);
+                RoomData newRoom = room.Clone();
+                roomPrefabs.Add(newRoom);
+                roomCenters.Add(newRoom.Center);
                 placed++;
-            }
             
+                for (int x = newRoom.x; x < newRoom.x + newRoom.width; x++)
+                for (int z = newRoom.y; z < newRoom.y + newRoom.height; z++)
+                    gridMap[x, z] = TileType.Room;
 
             switch (size)
             {
@@ -558,39 +641,40 @@ IEnumerator RespawnDungeon()
                 // room.enemyOffsets.Add(new Vector3(2, 0, 2));
                 break;
                 case RoomSize.BaseRoom2: baseRoom2Count--; 
-                room.enemyPrefabs.Add(enemyRanged);
-                room.enemyOffsets.Add(new Vector3(0, 0, 0));
-                room.enemyPrefabs.Add(enemyRanged);
-                room.enemyOffsets.Add(new Vector3(0, 0, 0));
+                newRoom.enemyPrefabs.Add(enemyRanged);
+                newRoom.enemyOffsets.Add(new Vector3(0, 0, 0));
+                newRoom.enemyPrefabs.Add(enemyRanged);
+                newRoom.enemyOffsets.Add(new Vector3(0, 0, 0));
                 break;
                 case RoomSize.BaseRoom3: baseRoom3Count--; 
-                room.enemyPrefabs.Add(enemyMelee);
-                room.enemyOffsets.Add(new Vector3(1, 0, 1));
-                room.enemyPrefabs.Add(enemyMelee);
-                room.enemyOffsets.Add(new Vector3(2, 0, 2));
+                newRoom.enemyPrefabs.Add(enemyMelee);
+                newRoom.enemyOffsets.Add(new Vector3(1, 0, 1));
+                newRoom.enemyPrefabs.Add(enemyMelee);
+                newRoom.enemyOffsets.Add(new Vector3(2, 0, 2));
                 break;
                 case RoomSize.BarracksRoom: barracksRoomCount--; 
-                room.enemyPrefabs.Add(enemyMage);
-                room.enemyOffsets.Add(new Vector3(1, 0, 1));
-                room.enemyPrefabs.Add(enemyRanged);
-                room.enemyOffsets.Add(new Vector3(2, 0, 2));
+                newRoom.enemyPrefabs.Add(enemyMage);
+                newRoom.enemyOffsets.Add(new Vector3(1, 0, 1));
+                newRoom.enemyPrefabs.Add(enemyRanged);
+                newRoom.enemyOffsets.Add(new Vector3(2, 0, 2));
                 break;
                 case RoomSize.LootRoom: lootRoomCount--; 
-                room.enemyPrefabs.Add(enemyMage);
-                room.enemyOffsets.Add(new Vector3(1, 0, 1));
-                room.enemyPrefabs.Add(enemyRanged);
-                room.enemyOffsets.Add(new Vector3(2, 0, 2));
+                newRoom.enemyPrefabs.Add(enemyMage);
+                newRoom.enemyOffsets.Add(new Vector3(1, 0, 1));
+                newRoom.enemyPrefabs.Add(enemyRanged);
+                newRoom.enemyOffsets.Add(new Vector3(2, 0, 2));
                 break;
                 case RoomSize.ArmoryRoom: armoryRoomCount--; 
-                room.enemyPrefabs.Add(enemyMage);
-                room.enemyOffsets.Add(new Vector3(1, 1, 1));
-                room.enemyPrefabs.Add(enemyRanged);
-                room.enemyOffsets.Add(new Vector3(2, 1, 2));
-                room.lootPrefabs.Add(lootPrefab);
-                room.lootOffsets.Add(new Vector3(3,1,3));
+                newRoom.enemyPrefabs.Add(enemyMage);
+                newRoom.enemyOffsets.Add(new Vector3(1, 1, 1));
+                newRoom.enemyPrefabs.Add(enemyRanged);
+                newRoom.enemyOffsets.Add(new Vector3(2, 1, 2));
+                newRoom.lootPrefabs.Add(lootPrefab);
+                newRoom.lootOffsets.Add(new Vector3(3,1,3));
                 break;
             }
                 
+        }
         }
         
 
@@ -658,13 +742,25 @@ IEnumerator RespawnDungeon()
             Vector2Int a = roomCenters[i];
             Vector2Int b = roomCenters[i + 1];
 
-            // First horizontal (1 tile wide)
+            // First horizontal
             for (int x = Mathf.Min(a.x, b.x); x <= Mathf.Max(a.x, b.x); x++)
-                SetIfEmpty(x, a.y, TileType.Hallway);
+            {
+                // Only place hallway if not cutting through a room
+                if (gridMap[x, a.y] != TileType.Room)
+                {
+                    SetIfEmpty(x, a.y, TileType.Hallway);
+                }
+            }
 
-            // Then vertical (1 tile wide)
+            // Then vertical
             for (int z = Mathf.Min(a.y, b.y); z <= Mathf.Max(a.y, b.y); z++)
-                SetIfEmpty(b.x, z, TileType.Hallway);
+            {
+                // Only place hallway if not cutting through a room
+                if (gridMap[b.x, z] != TileType.Room)
+                {
+                    SetIfEmpty(b.x, z, TileType.Hallway);
+                }
+            }
         }
     }
 
@@ -672,8 +768,19 @@ IEnumerator RespawnDungeon()
     {
         if (x >= 0 && x < GridX && z >= 0 && z < GridZ)
         {
-            if (gridMap[x, z] == TileType.Empty)
+            if (gridMap[x, z] == TileType.Empty || gridMap[x, z] == TileType.Hallway)
+            {
                 gridMap[x, z] = type;
+                
+                // If this is a hallway, add it to the spawned halls list
+                if (type == TileType.Hallway)
+                {
+                    Vector3 pos = new Vector3(x * gridSpacingOffset, 0, z * gridSpacingOffset) + GridOrigin;
+                    GameObject hall = Instantiate(GridPrefabs[1], pos, Quaternion.identity);
+                    spawnedHalls.Add(hall);
+                    hall.transform.parent = transform;
+                }
+            }
         }
     }
 

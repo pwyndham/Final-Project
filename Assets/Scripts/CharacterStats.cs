@@ -355,13 +355,49 @@ public class CharacterStats : MonoBehaviour
             {
                 Debug.Log("Dead");
                 yield return new WaitForSeconds(1f);
+                StartCoroutine(TeleportToLossDungeon());
             }
             //wait death, game over screen, tp to shopkeeper
             //gameObject.SetActive(false);
             //Destroy(gameObject, 1f);
         }
     }
+    IEnumerator TeleportToLossDungeon()
+    {
+        yield return new WaitForSeconds(2f);
+        TeleportPlayerToLoserDungeon();
+    }
+    void TeleportPlayerToLoserDungeon()
+    {
+        if (PlayerController.Instance != null)
+        {
+            CharacterController controller = PlayerController.Instance.GetComponent<CharacterController>();
+            //CharacterInput controller2 = PlayerController.Instance.GetComponent<CharacterInput>();
+            GameObject lossTransform = new GameObject();
+            Transform lossDungeonTransform = lossTransform.transform;
+            lossDungeonTransform.position = new Vector3(-30.8f, 1, 53.13f);
 
+            if (controller != null)
+            {
+                controller.enabled = false;
+                //controller2.enabled = false;
+                
+
+                PlayerController.Instance.transform.position = lossDungeonTransform.position;
+                controller.enabled = true;
+            }
+            else
+            {
+                PlayerController.Instance.transform.position = lossDungeonTransform.position;
+            }
+
+            Debug.Log("Player teleported to " + lossDungeonTransform.position);
+        }
+        else
+        {
+            Debug.LogWarning("PlayerController.Instance is null");
+        }
+    }
     void Update()
     {
         //OnDrawGizmosSelected();
