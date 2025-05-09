@@ -347,8 +347,18 @@ public class CharacterStats : MonoBehaviour
     
         if(healthPoints <= 0) 
         {
-            gameObject.SetActive(false);
-            //Destroy(gameObject);
+            PlayerAnimationStateChanger playerAnimationStateChanger = GetComponent<PlayerAnimationStateChanger>();
+            playerAnimationStateChanger.ChangeAnimation("CharacterDeath");
+
+            StartCoroutine(WaitForDeath());
+            IEnumerator WaitForDeath()
+            {
+                Debug.Log("Dead");
+                yield return new WaitForSeconds(1f);
+            }
+            //wait death, game over screen, tp to shopkeeper
+            //gameObject.SetActive(false);
+            //Destroy(gameObject, 1f);
         }
     }
 

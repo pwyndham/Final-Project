@@ -34,6 +34,23 @@ public abstract class Creature : MonoBehaviour
         characterExperience.gainExperience(experiencePoints);
     }
         Debug.Log("Give Character experience " + experiencePoints);
+
+        switch(creatureType)
+            {
+                case "Melee Creature":
+                animationStateChanger.ChangeAnimation("CharacterEnemyMeleeDeath");
+                break;
+                case "Magic Creature":
+                animationStateChanger.ChangeAnimation("CharacterEnemyMageDeath");
+                break;
+                case "Ranged Creature":
+                animationStateChanger.ChangeAnimation("CharacterEnemyRangedDeath");
+                break;
+                default:
+                break;
+            }
+            Destroy(gameObject, 1f);
+
     }
 
     protected virtual void Awake()
@@ -90,7 +107,6 @@ public abstract class Creature : MonoBehaviour
             Debug.Log(gameObject.name + " died.");
             characterStats.GiveMoney(creatureMoney);
             Die(experiencePoints);
-            Destroy(gameObject);
         }
     }
 

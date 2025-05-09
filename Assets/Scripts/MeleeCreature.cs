@@ -70,6 +70,7 @@ public class MeleeCreature : Creature
 
     public override void TakeDamage(float damageAmount) {
          base.TakeDamage(damageAmount);
+        
     }
 
    
