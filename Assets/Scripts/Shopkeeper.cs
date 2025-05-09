@@ -30,6 +30,7 @@ public class Shopkeeper : Interactable
     [SerializeField] private GameObject energyPotionPrefab;
     [SerializeField] private Transform playerInventorySlotParent;
     [SerializeField] private Transform playerInventoryGrid;
+    AnimationStateChanger animationStateChanger;
     public int ManaPotionPrice;
     public int HealthPotionPrice;
     public int EnergyPotionPrice;
@@ -50,6 +51,8 @@ public class Shopkeeper : Interactable
     }
     void Awake()
     {
+        animationStateChanger = GetComponent<AnimationStateChanger>();
+        animationStateChanger.ChangeAnimation("ShopkeeperIdle");
         //characterStats = GetComponent<CharacterStats>();
         //CharacterMoney = characterStats.characterMoney;
     }

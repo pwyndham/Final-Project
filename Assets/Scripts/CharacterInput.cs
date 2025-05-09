@@ -127,11 +127,36 @@ public class CharacterInput : MonoBehaviour
                 playerAnimationStateChanger.ChangeAnimation("CharacterMeleeAttack");
                 return;
             }
+            else if (Input.GetKey(KeyCode.Q) &&  characterStats.classTypeCached == "Warrior Class")
+            {
+                //raging slashes
+                playerAnimationStateChanger.ChangeAnimation("CharacterRagingSlashes");
+                return;
+            }
+            else if (Input.GetKey(KeyCode.E) &&  characterStats.classTypeCached == "Warrior Class")
+            {
+                //forcefield
+                playerAnimationStateChanger.ChangeAnimation("CharacterForcefield");
+                return;
+            }
             else if (Input.GetKey(KeyCode.Mouse0) &&  characterStats.classTypeCached == "Rogue Class")
             {
                 playerAnimationStateChanger.ChangeAnimation("CharacterMeleeAttack");
                 return;
             }
+            else if (Input.GetKey(KeyCode.Q) &&  characterStats.classTypeCached == "Rogue Class")
+            {
+                //dash
+                playerAnimationStateChanger.ChangeAnimation("CharacterDash");
+                return;
+            }
+            else if (Input.GetKey(KeyCode.E) &&  characterStats.classTypeCached == "Rogue Class")
+            {
+                //frenzy
+                playerAnimationStateChanger.ChangeAnimation("CharacterRagingSlashes");
+                return;
+            }
+            
         
         
         if (playerInput.magnitude > 0.1f)
