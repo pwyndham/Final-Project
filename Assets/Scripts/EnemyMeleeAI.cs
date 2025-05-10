@@ -56,7 +56,7 @@ void Start()
 
         float distance = Vector3.Distance(playerTransform.position, transform.position);
 
-        if (waypoints != null && waypoints.Length > 0)
+        if (navMeshAgent.isOnNavMesh && navMeshAgent.isActiveAndEnabled)
         {
             if (navMeshAgent.remainingDistance < 0.1f)
             {
@@ -67,7 +67,7 @@ void Start()
         }
         else
         {
-            Debug.LogWarning($"{gameObject.name} has no waypoints assigned!");
+            Debug.LogWarning($"{gameObject.name} is not on a NavMesh!");
         }
 
         if (distance <= lookRadius)

@@ -6,7 +6,7 @@ public class RogueClass : BaseClass
     public int _strength  = 3;
     public int _intelligence  = 2;
     public int _dexterity  = 10;
-    public int _constitution  = 3;
+    public int _constitution  = 4;
     public int _agility  = 8;
     public int _endurance  = 4;
     public int _perception  = 6;

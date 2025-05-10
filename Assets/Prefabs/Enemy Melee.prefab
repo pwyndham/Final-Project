@@ -370,9 +370,17 @@ PrefabInstance:
       propertyPath: m_Name
       value: Enemy Melee
       objectReference: {fileID: 0}
+    - target: {fileID: 931714695991051571, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 972707154172353119, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}
       propertyPath: m_Enabled
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2571932374580747180, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}
+      propertyPath: m_Height
+      value: 3.55
       objectReference: {fileID: 0}
     - target: {fileID: 2674686198616501390, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}
       propertyPath: m_LocalScale.x
@@ -488,6 +496,7 @@ PrefabInstance:
     - {fileID: 972707154172353119, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}
     - {fileID: 527552642104158063, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}
     - {fileID: -1297647582192457012, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}
+    - {fileID: 67276698991909726, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}
     m_RemovedGameObjects:
     - {fileID: 2373827076449409467, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}
     m_AddedGameObjects:
@@ -513,6 +522,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 931714695991051571, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2988378174936657074}
+    - targetCorrespondingSourceObject: {fileID: 931714695991051571, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4120066881677412}
     - targetCorrespondingSourceObject: {fileID: 6981114888070235019, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6933068623795298771}
@@ -570,6 +582,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7741704928193940910, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}
   m_PrefabInstance: {fileID: 4627795836399288909}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &4044062602262230932 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8657711005064017369, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}
+  m_PrefabInstance: {fileID: 4627795836399288909}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67db9e8f0e2ae9c40bc1e2b64352a6b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5536936456726136702 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 931714695991051571, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}
@@ -615,8 +638,8 @@ MonoBehaviour:
   creature: {fileID: 0}
   playerTransform: {fileID: 0}
   waypoints: []
-  lookRadius: 5
-  attackRange: 2
+  lookRadius: 40
+  attackRange: 3
   attackCooldown: 0.3
 --- !u!195 &2988378174936657074
 NavMeshAgent:
@@ -628,7 +651,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
-  m_Speed: 1
+  m_Speed: 2.3
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120
@@ -640,6 +663,19 @@ NavMeshAgent:
   m_BaseOffset: 1.4
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &4120066881677412
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5536936456726136702}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a6f30a9045ba6643ae0c40dd9c77caf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  slider: {fileID: 4044062602262230932}
 --- !u!4 &7288899140811075267 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2674686198616501390, guid: 8afd675aa7290ce4b802d16f1812c29d, type: 3}

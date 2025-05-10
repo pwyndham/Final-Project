@@ -73,14 +73,18 @@ public class EnemyLevelManager : MonoBehaviour
     }
 
     void OnCharacterLevelUp()
-{
-    if (this == null || !gameObject) return;
-    RecalculateEnemyLevel();
-    RecalculateEnemyStats(enemyLevel);
-    UpdateMeleeWeapon();
-    UpdateRangedWeapon();
-}
+    {
+        RecalculateEnemyLevel();
+        StartCoroutine(DelayedRecalculateStats(1f));
+    }
 
+    IEnumerator DelayedRecalculateStats(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        RecalculateEnemyStats(enemyLevel);
+        UpdateMeleeWeapon();
+        UpdateRangedWeapon();
+    }
     void RecalculateEnemyLevel()
     {
         switch(enemyLevelType)
@@ -135,7 +139,7 @@ public class EnemyLevelManager : MonoBehaviour
     int xpBoost = 0;
     float damageMultiplier = 1f;
     float fireRateBoost = 0f;
-    float projectileSpeed = 0f;
+    float projectileSpeed = 1f;
 
     switch (enemyLevelType)
     {
@@ -152,7 +156,7 @@ public class EnemyLevelManager : MonoBehaviour
             xpBoost = 15;
             damageMultiplier = 1.2f;
             fireRateBoost = 0.4f;
-            projectileSpeed = .4f;
+            projectileSpeed = .01f;
             break;
         case "Magic Creature":
             healthMultiplier = 1.10f;
@@ -160,7 +164,7 @@ public class EnemyLevelManager : MonoBehaviour
             xpBoost = 20;
             damageMultiplier = 1.5f;
             fireRateBoost = 0.5f;
-            projectileSpeed = .5f;
+            projectileSpeed = .01f;
             break;
         default:
             Debug.LogWarning("Unknown enemy type in stats scaling.");

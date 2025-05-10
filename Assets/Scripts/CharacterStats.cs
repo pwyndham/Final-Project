@@ -197,9 +197,11 @@ public class CharacterStats : MonoBehaviour
         //they can use whenever
         //in UI reference character stat and send point back to stat class
     }
+   public ManaBar manaBar;
    public void ApplyStatCalculation()
    {    
-        
+        manaBar.enabled = true;
+        //FindObjectsByType("ManaBar");
         limiter = .1f;
         
         //TODO:
@@ -225,7 +227,7 @@ public class CharacterStats : MonoBehaviour
         //TODO: 
         meleeShortDamage = characterClass.dexterity * characterClass.dexterityMultiplier;
     
-        float speedMult = 3f;
+        float speedMult = 5f;
         float jumpAndSpringMult = 1.5f;
         //TODO: 
         characterSpeed = speedMult * (float)Math.Log((double)characterClass.agility, (double)characterClass.agilityMultiplier);
@@ -251,34 +253,34 @@ public class CharacterStats : MonoBehaviour
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, enemyDetection);
     }
-    void DetectEnemies()
-    {
-        float radius = 2f; // thickness of the "ray"
-        float maxDistance = enemyDetection;
-        LayerMask mask = LayerMask.GetMask("Enemy");
+    // void DetectEnemies()
+    // {
+    //     float radius = 2f; // thickness of the "ray"
+    //     float maxDistance = enemyDetection;
+    //     LayerMask mask = LayerMask.GetMask("Enemy");
     
-    Ray ray = new Ray(transform.position, transform.forward); // from player forward
-    Creature hitCreature;
-    if (Physics.SphereCast(ray, radius, out RaycastHit hit, maxDistance, mask))
-        {
-            hitCreature = hit.collider.GetComponent<Creature>();
-            if (hitCreature != null)
-            {
-                hitCreature.EnableOutline();
-                StartCoroutine(StopOutlinePeriod(hitCreature));
-            }
-            Debug.Log("Enemy hit with SphereCast: " + hit.collider.name);
-        }
-    }
+    // Ray ray = new Ray(transform.position, transform.forward); // from player forward
+    // Creature hitCreature;
+    // if (Physics.SphereCast(ray, radius, out RaycastHit hit, maxDistance, mask))
+    //     {
+    //         hitCreature = hit.collider.GetComponent<Creature>();
+    //         if (hitCreature != null)
+    //         {
+    //             hitCreature.EnableOutline();
+    //             StartCoroutine(StopOutlinePeriod(hitCreature));
+    //         }
+    //         Debug.Log("Enemy hit with SphereCast: " + hit.collider.name);
+    //     }
+    // }
 
-    IEnumerator StopOutlinePeriod(Creature creature)
-    {
-        yield return new WaitForSeconds(3);
-        if (creature != null)
-        {
-        creature.DisableOutline();
-        }
-    }
+    // IEnumerator StopOutlinePeriod(Creature creature)
+    // {
+    //     yield return new WaitForSeconds(3);
+    //     if (creature != null)
+    //     {
+    //     creature.DisableOutline();
+    //     }
+    // }
     public float ApplyCriticalStrikeChance(float baseDamage)
     {
         float critDamage = 2f;
@@ -366,6 +368,7 @@ public class CharacterStats : MonoBehaviour
     {
         yield return new WaitForSeconds(2f);
         TeleportPlayerToLoserDungeon();
+        
     }
     void TeleportPlayerToLoserDungeon()
     {
@@ -375,14 +378,14 @@ public class CharacterStats : MonoBehaviour
             //CharacterInput controller2 = PlayerController.Instance.GetComponent<CharacterInput>();
             GameObject lossTransform = new GameObject();
             Transform lossDungeonTransform = lossTransform.transform;
-            lossDungeonTransform.position = new Vector3(-30.8f, 1, 53.13f);
+            lossDungeonTransform.position = new Vector3(-30.8f, -48.544f, 53.3913f);
 
             if (controller != null)
             {
                 controller.enabled = false;
                 //controller2.enabled = false;
-                
-
+                healthPoints = maxHealthPoints;
+                UpdateBars();
                 PlayerController.Instance.transform.position = lossDungeonTransform.position;
                 controller.enabled = true;
             }
@@ -401,7 +404,7 @@ public class CharacterStats : MonoBehaviour
     void Update()
     {
         //OnDrawGizmosSelected();
-        DetectEnemies();
+        // DetectEnemies();
         RegenerateEnergy();
         RegenerateMana();
     }

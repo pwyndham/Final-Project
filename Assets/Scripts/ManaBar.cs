@@ -25,10 +25,10 @@ public class ManaBar : MonoBehaviour
         slider.value = currentMana;
         currentManaText.text = currentMana + "/" + maxMana;
     }
-    void Start()
-    {
-       // OnEnable();
-        characterStats.ApplyStatCalculation();
-    }
+    // void Start()
+    // {
+    //    // OnEnable();
+    //     characterStats.ApplyStatCalculation();
+    // }
         
 }

@@ -62,7 +62,6 @@ public class MagicCreature : Creature
         animationStateChanger.ChangeAnimation("Enemy Idle");
     }
 
-    public void Die(){}
 
     public override void TakeDamage(float damageAmount) {
          base.TakeDamage(damageAmount);

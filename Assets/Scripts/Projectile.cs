@@ -38,16 +38,16 @@ public class Projectile : MonoBehaviour
         switch (projectileType)
         {
             case ProjectileType.EnemyMagicProjectile:
-                damage = 5f;
+                //damage = 5f;
                 break;
             case ProjectileType.EnemyRangedProjectile:
-                damage = 7f;
+                //damage = 7f;
                 break;
             case ProjectileType.PlayerMagicProjectile:
                 damage = characterStats != null ? characterStats.magicDamage : 10f;
                 break;
             default:
-                damage = 5f;
+                //damage = 5f;
                 break;
         }
     }

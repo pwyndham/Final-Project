@@ -4,10 +4,10 @@ public class WarriorClass : BaseClass
 {
     
     public override string classType => "Warrior Class";
-    public int _strength  = 10;
+    public int _strength  = 5;
     public int _intelligence  = 0;
     public int _dexterity  = 3;
-    public int _constitution  = 10;
+    public int _constitution  = 5;
     public int _agility  = 3;
     public int _endurance  = 7;
     public int _perception  = 1;

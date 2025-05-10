@@ -28,6 +28,7 @@ public class SpawnPrefabGrid : MonoBehaviour
     private List<Vector2Int> roomCenters = new List<Vector2Int>();
     private List<RoomData> roomPrefabs = new List<RoomData>();
     public List<GameObject> spawnedEnemies = new List<GameObject>();
+    public List<GameObject> bossAI = new List<GameObject>();
     List<GameObject> spawnedWalls = new List<GameObject>();
     List<GameObject> spawnedDoors = new List<GameObject>();
     List<GameObject> spawnedHalls = new List<GameObject>();
@@ -45,6 +46,7 @@ public class SpawnPrefabGrid : MonoBehaviour
     public int barracksRoomCount = 1;
     public int armoryRoomCount = 1;
 
+    
     
 
     public enum RoomSize { BaseRoom1, BaseRoom2, BaseRoom3, LootRoom, ArmoryRoom, BarracksRoom, None }
@@ -135,40 +137,61 @@ void Update()
     }
     if (Input.GetKeyDown(KeyCode.Alpha4))
     {
-        Debug.Log("Pressed 0");
+        Debug.Log("Pressed 4");
         Debug.Log("Teleport player back");
+        for (int i = 0; i < bossAI.Count; i++)
+        {
+            bossAI[i].SetActive(true);
+        }
         StartCoroutine(BossTeleporter());
         return;
     }
+    if (Input.GetKeyDown(KeyCode.Alpha5))
+    {
+        Debug.Log("Pressed 5");
+        Debug.Log("Teleport player back");
+        
 
+        StartCoroutine(TeleportToShop());
+        return;
+    }
     // Only run this coroutine if not already checking
     if (canCheckEnemies && !checkingEnemies)
     {
         StartCoroutine(RemoveDestroyedEnemies());
     }
+
+    
 }
+    
+
 private bool checkingEnemies = false;
     IEnumerator RemoveDestroyedEnemies()
-{
-    checkingEnemies = true;
-
-    yield return null; // Optional frame delay
-
-    spawnedEnemies.RemoveAll(e => e == null);
-
-    if (spawnedEnemies.Count <= 0)
     {
-        Debug.Log("Teleport player");
-        TeleportPlayer();
-        canCheckEnemies = false;
-    }
+        checkingEnemies = true;
 
-    checkingEnemies = false;
-}
+        yield return null; // Optional frame delay
+
+        spawnedEnemies.RemoveAll(e => e == null);
+
+        if (spawnedEnemies.Count <= 0)
+        {
+            Debug.Log("Teleport player");
+            TeleportPlayer();
+            canCheckEnemies = false;
+        }
+
+        checkingEnemies = false;
+    }
     IEnumerator BossTeleporter()
     {
         yield return new WaitForSeconds(2f);
         TeleportPlayerToBoss();
+    }
+    IEnumerator TeleportToShop()
+    {
+        yield return new WaitForSeconds(2f);
+        TeleportPlayer();
     }
     void TeleportPlayerToBoss() //boss
     {
@@ -208,6 +231,7 @@ private bool checkingEnemies = false;
             {
                 controller.enabled = false;
                 //controller2.enabled = false;
+                //controller.Move(shopkeeperTransform.position);
                 PlayerController.Instance.transform.position = shopkeeperTransform.position;
                 controller.enabled = true;
             }
@@ -520,7 +544,7 @@ IEnumerator RespawnDungeon()
 
                     for (int w = 0; w < 4; w++) // generate waypoints around enemy spawn
                     {
-                        Vector3 offset = Random.insideUnitSphere * 3f;
+                        Vector3 offset = Random.insideUnitSphere * 10f;
                         offset.y = 0;
                         Vector3 wpPos = spawnPos + offset;
 
@@ -531,6 +555,14 @@ IEnumerator RespawnDungeon()
                             wp.transform.parent = transform;
                             enemyWaypoints.Add(wp.transform);
                         }
+                    }
+                    if (enemyWaypoints.Count == 0)
+                    {
+                        foreach (Transform wp in enemyWaypoints)
+                        {
+                            Destroy(wp.gameObject);
+                        }
+                        Destroy(enemy);
                     }
 
                     EnemyRangedAI ai = enemy.GetComponent<EnemyRangedAI>();
@@ -642,35 +674,81 @@ IEnumerator RespawnDungeon()
                 break;
                 case RoomSize.BaseRoom2: baseRoom2Count--; 
                 newRoom.enemyPrefabs.Add(enemyRanged);
-                newRoom.enemyOffsets.Add(new Vector3(0, 0, 0));
+                newRoom.enemyOffsets.Add(new Vector3(20, 0, 20));
                 newRoom.enemyPrefabs.Add(enemyRanged);
-                newRoom.enemyOffsets.Add(new Vector3(0, 0, 0));
+                newRoom.enemyOffsets.Add(new Vector3(20, 0, 20));
+                newRoom.lootPrefabs.Add(lootPrefab);
+                newRoom.lootOffsets.Add(new Vector3(5, 1, 6));
                 break;
                 case RoomSize.BaseRoom3: baseRoom3Count--; 
                 newRoom.enemyPrefabs.Add(enemyMelee);
-                newRoom.enemyOffsets.Add(new Vector3(1, 0, 1));
+                newRoom.enemyOffsets.Add(new Vector3(20, 0, 20));
                 newRoom.enemyPrefabs.Add(enemyMelee);
-                newRoom.enemyOffsets.Add(new Vector3(2, 0, 2));
+                newRoom.enemyOffsets.Add(new Vector3(20, 0, 20));
+                newRoom.enemyPrefabs.Add(enemyMage);
+                newRoom.enemyOffsets.Add(new Vector3(20, 0, 20));
+                newRoom.lootPrefabs.Add(lootPrefab);
+                newRoom.lootOffsets.Add(new Vector3(5, 1, 6));
                 break;
                 case RoomSize.BarracksRoom: barracksRoomCount--; 
+                newRoom.enemyPrefabs.Add(enemyMelee);
+                newRoom.enemyOffsets.Add(new Vector3(20, 0, 20));
+                newRoom.enemyPrefabs.Add(enemyMelee);
+                newRoom.enemyOffsets.Add(new Vector3(20, 0, 20));
                 newRoom.enemyPrefabs.Add(enemyMage);
-                newRoom.enemyOffsets.Add(new Vector3(1, 0, 1));
+                newRoom.enemyOffsets.Add(new Vector3(20, 0, 20));
                 newRoom.enemyPrefabs.Add(enemyRanged);
-                newRoom.enemyOffsets.Add(new Vector3(2, 0, 2));
-                break;
-                case RoomSize.LootRoom: lootRoomCount--; 
+                newRoom.enemyOffsets.Add(new Vector3(20, 0, 20));
                 newRoom.enemyPrefabs.Add(enemyMage);
-                newRoom.enemyOffsets.Add(new Vector3(1, 0, 1));
+                newRoom.enemyOffsets.Add(new Vector3(20, 0, 20));
                 newRoom.enemyPrefabs.Add(enemyRanged);
-                newRoom.enemyOffsets.Add(new Vector3(2, 0, 2));
-                break;
-                case RoomSize.ArmoryRoom: armoryRoomCount--; 
-                newRoom.enemyPrefabs.Add(enemyMage);
-                newRoom.enemyOffsets.Add(new Vector3(1, 1, 1));
-                newRoom.enemyPrefabs.Add(enemyRanged);
-                newRoom.enemyOffsets.Add(new Vector3(2, 1, 2));
+                newRoom.enemyOffsets.Add(new Vector3(20, 0, 20));
                 newRoom.lootPrefabs.Add(lootPrefab);
-                newRoom.lootOffsets.Add(new Vector3(3,1,3));
+                newRoom.lootOffsets.Add(new Vector3(5, 1, 6));
+                newRoom.lootPrefabs.Add(lootPrefab);
+                newRoom.lootOffsets.Add(new Vector3(7, 1, 6));
+                break;
+                case RoomSize.LootRoom: lootRoomCount--;
+                newRoom.enemyPrefabs.Add(enemyMelee);
+                newRoom.enemyOffsets.Add(new Vector3(20, 0, 20));
+                newRoom.enemyPrefabs.Add(enemyMelee);
+                newRoom.enemyOffsets.Add(new Vector3(20, 0, 20)); 
+                newRoom.enemyPrefabs.Add(enemyMage);
+                newRoom.enemyOffsets.Add(new Vector3(20, 0, 20));
+                newRoom.enemyPrefabs.Add(enemyRanged);
+                newRoom.enemyOffsets.Add(new Vector3(20, 0, 20));
+                newRoom.lootOffsets.Add(new Vector3(15, 1, 6));
+                newRoom.lootPrefabs.Add(lootPrefab);
+                newRoom.lootOffsets.Add(new Vector3(13, 1, 6));
+                newRoom.lootPrefabs.Add(lootPrefab);
+                newRoom.lootOffsets.Add(new Vector3(11, 1, 6));
+                newRoom.lootPrefabs.Add(lootPrefab);
+                newRoom.lootOffsets.Add(new Vector3(9, 1, 6));
+                newRoom.lootPrefabs.Add(lootPrefab);
+                newRoom.lootOffsets.Add(new Vector3(7, 1, 6));
+                newRoom.lootPrefabs.Add(lootPrefab);
+                newRoom.lootOffsets.Add(new Vector3(5, 1, 6));
+                newRoom.lootPrefabs.Add(lootPrefab);
+                break;
+                case RoomSize.ArmoryRoom: armoryRoomCount--;
+                newRoom.enemyPrefabs.Add(enemyMelee);
+                newRoom.enemyOffsets.Add(new Vector3(20, 0, 20));
+                newRoom.enemyPrefabs.Add(enemyMelee);
+                newRoom.enemyOffsets.Add(new Vector3(20, 0, 20)); 
+                newRoom.enemyPrefabs.Add(enemyMage);
+                newRoom.enemyOffsets.Add(new Vector3(20, 0, 20));
+                newRoom.enemyPrefabs.Add(enemyRanged);
+                newRoom.enemyOffsets.Add(new Vector3(20, 0, 20));
+                newRoom.enemyPrefabs.Add(enemyRanged);
+                newRoom.enemyOffsets.Add(new Vector3(20, 0, 20));
+                newRoom.enemyPrefabs.Add(enemyRanged);
+                newRoom.enemyOffsets.Add(new Vector3(20, 0, 20));
+                newRoom.lootPrefabs.Add(lootPrefab);
+                newRoom.lootOffsets.Add(new Vector3(15, 1, 6));
+                newRoom.lootPrefabs.Add(lootPrefab);
+                newRoom.lootOffsets.Add(new Vector3(13, 1, 6));
+                newRoom.lootPrefabs.Add(lootPrefab);
+                newRoom.lootOffsets.Add(new Vector3(11, 1, 6));
                 break;
             }
                 
@@ -684,6 +762,8 @@ IEnumerator RespawnDungeon()
 
         StartCoroutine(EnemyGenerator()); 
         StartCoroutine(LootGenerator());
+
+        
         
     }
 

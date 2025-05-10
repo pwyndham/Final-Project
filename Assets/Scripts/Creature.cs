@@ -30,11 +30,12 @@ public abstract class Creature : MonoBehaviour
     public virtual void Die(int experiencePoints)
     {
         if (characterExperience != null)
-    {
-        characterExperience.gainExperience(experiencePoints);
-    }
+        {
+            characterExperience.gainExperience(experiencePoints);
+        }
         Debug.Log("Give Character experience " + experiencePoints);
 
+        
         switch(creatureType)
             {
                 case "Melee Creature":
@@ -104,8 +105,18 @@ public abstract class Creature : MonoBehaviour
 
     if (health <= 0)
         {
+
+            if (characterController != null)
+            characterController.enabled = false;
+
+            Collider collider = GetComponent<Collider>();
+            if (collider != null)
+                collider.enabled = false;
+
+            healthBar.SetHealth(0);
             Debug.Log(gameObject.name + " died.");
             characterStats.GiveMoney(creatureMoney);
+            
             Die(experiencePoints);
         }
     }

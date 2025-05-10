@@ -6,7 +6,7 @@ public class MageClass : BaseClass
 
     public override string classType => "Magic Class";
     public int _strength  = 1;
-    public int _intelligence  = 11;
+    public int _intelligence  = 5;
     public int _dexterity  = 1;
     public int _constitution  = 3;
     public int _agility  = 2;
