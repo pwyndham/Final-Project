@@ -368,6 +368,8 @@ public class CharacterStats : MonoBehaviour
     {
         yield return new WaitForSeconds(2f);
         TeleportPlayerToLoserDungeon();
+        PlayerAnimationStateChanger playerAnimationStateChanger = GetComponent<PlayerAnimationStateChanger>();
+            playerAnimationStateChanger.ChangeAnimation("CharacterIdle");
         
     }
     void TeleportPlayerToLoserDungeon()

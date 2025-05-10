@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections;
-using UnityEditor.Rendering.Universal;
 public class MageBasicAttack : Ability
 {
     public string animationName;
@@ -77,7 +76,7 @@ public class MageBasicAttack : Ability
                     if (projectileComponent != null)
                     {
                         projectileComponent.Launch(direction, characterStats.magicDamage, characterStats.projectileSpeed);
-                        projectileComponent.SetProjectileStats(characterStats); // ✅ pass stats to projectile
+                        projectileComponent.SetProjectileStats(characterStats); //  pass stats to projectile
                     }
                 }
             }

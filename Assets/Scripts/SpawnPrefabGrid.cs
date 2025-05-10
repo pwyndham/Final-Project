@@ -318,7 +318,6 @@ IEnumerator RespawnDungeon()
     gridMap = new TileType[(int)GridX, (int)GridZ];
     
     // Reset room counts to initial values
-    // Add these variables at the class level if you haven't already
     baseRoom1Count = initialbaseRoom1Count;
     baseRoom2Count = initialbaseRoom2Count;
     baseRoom3Count = initialbaseRoom3Count;

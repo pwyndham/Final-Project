@@ -67,7 +67,7 @@ public class LightShot : Ability
                     if (projectileComponent != null)
                     {
                         projectileComponent.Launch(direction, characterStats.magicDamage, characterStats.projectileSpeed);
-                        projectileComponent.SetProjectileStats(characterStats); // ✅ pass stats to projectile
+                        projectileComponent.SetProjectileStats(characterStats); //  pass stats to projectile
                     }
                 }
             }
